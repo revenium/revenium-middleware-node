@@ -1,0 +1,211 @@
+{
+  "name": "@revenium/middleware",
+  "version": "1.0.0",
+  "description": "Unified Revenium middleware for AI provider usage tracking - OpenAI, Anthropic, Google, Perplexity, LiteLLM",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    },
+    "./openai": {
+      "import": {
+        "types": "./dist/types/openai/index.d.ts",
+        "default": "./dist/esm/openai/index.js"
+      },
+      "require": {
+        "types": "./dist/types/openai/index.d.ts",
+        "default": "./dist/cjs/openai/index.js"
+      }
+    },
+    "./anthropic": {
+      "import": {
+        "types": "./dist/types/anthropic/index.d.ts",
+        "default": "./dist/esm/anthropic/index.js"
+      },
+      "require": {
+        "types": "./dist/types/anthropic/index.d.ts",
+        "default": "./dist/cjs/anthropic/index.js"
+      }
+    },
+    "./google/genai": {
+      "import": {
+        "types": "./dist/types/google/genai/index.d.ts",
+        "default": "./dist/esm/google/genai/index.js"
+      },
+      "require": {
+        "types": "./dist/types/google/genai/index.d.ts",
+        "default": "./dist/cjs/google/genai/index.js"
+      }
+    },
+    "./google/vertex": {
+      "import": {
+        "types": "./dist/types/google/vertex/index.d.ts",
+        "default": "./dist/esm/google/vertex/index.js"
+      },
+      "require": {
+        "types": "./dist/types/google/vertex/index.d.ts",
+        "default": "./dist/cjs/google/vertex/index.js"
+      }
+    },
+    "./perplexity": {
+      "import": {
+        "types": "./dist/types/perplexity/index.d.ts",
+        "default": "./dist/esm/perplexity/index.js"
+      },
+      "require": {
+        "types": "./dist/types/perplexity/index.d.ts",
+        "default": "./dist/cjs/perplexity/index.js"
+      }
+    },
+    "./litellm": {
+      "import": {
+        "types": "./dist/types/litellm/index.d.ts",
+        "default": "./dist/esm/litellm/index.js"
+      },
+      "require": {
+        "types": "./dist/types/litellm/index.d.ts",
+        "default": "./dist/cjs/litellm/index.js"
+      }
+    },
+    "./tools": {
+      "import": {
+        "types": "./dist/types/_core/tool-metering/index.d.ts",
+        "default": "./dist/esm/_core/tool-metering/index.js"
+      },
+      "require": {
+        "types": "./dist/types/_core/tool-metering/index.d.ts",
+        "default": "./dist/cjs/_core/tool-metering/index.js"
+      }
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "openai": [
+        "dist/types/openai/index.d.ts"
+      ],
+      "anthropic": [
+        "dist/types/anthropic/index.d.ts"
+      ],
+      "google/genai": [
+        "dist/types/google/genai/index.d.ts"
+      ],
+      "google/vertex": [
+        "dist/types/google/vertex/index.d.ts"
+      ],
+      "perplexity": [
+        "dist/types/perplexity/index.d.ts"
+      ],
+      "litellm": [
+        "dist/types/litellm/index.d.ts"
+      ],
+      "tools": [
+        "dist/types/_core/tool-metering/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types && npm run fix-esm",
+    "build:cjs": "tsc -p tsconfig.json",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "fix-esm": "node scripts/fix-esm-imports.js",
+    "clean": "node -e \"const fs = require('fs'); if (fs.existsSync('dist')) fs.rmSync('dist', {recursive: true, force: true})\"",
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "jest",
+    "test:openai": "jest --testPathPatterns=tests/unit/openai",
+    "test:anthropic": "jest --testPathPatterns=tests/unit/anthropic",
+    "test:google": "jest --testPathPatterns=tests/unit/google",
+    "test:perplexity": "jest --testPathPatterns=tests/unit/perplexity",
+    "test:litellm": "jest --testPathPatterns=tests/unit/litellm",
+    "test:core": "jest --testPathPatterns=tests/unit/_core",
+    "test:integration": "jest --testPathPatterns=tests/integration",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/ tests/",
+    "lint:fix": "eslint src/ tests/ --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "keywords": [
+    "revenium",
+    "middleware",
+    "openai",
+    "anthropic",
+    "google",
+    "perplexity",
+    "litellm",
+    "ai",
+    "metering",
+    "usage-tracking",
+    "typescript"
+  ],
+  "author": "Revenium",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/revenium/revenium-middleware-node.git"
+  },
+  "homepage": "https://github.com/revenium/revenium-middleware-node#readme",
+  "bugs": {
+    "url": "https://github.com/revenium/revenium-middleware-node/issues"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=0.24.0",
+    "@google/genai": ">=1.17.0",
+    "google-auth-library": ">=10.0.0",
+    "openai": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    },
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "@google/genai": {
+      "optional": true
+    },
+    "google-auth-library": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.55.1",
+    "@google/genai": "^1.17.0",
+    "@jest/globals": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "dotenv": "^16.5.0",
+    "eslint": "^10.0.2",
+    "google-auth-library": "^10.0.0",
+    "jest": "^30.2.0",
+    "openai": "^5.0.0",
+    "prettier": "^3.8.1",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.0.0",
+    "typescript-eslint": "^8.56.1"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.map",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
