@@ -143,10 +143,6 @@ vite.config.ts.timestamp-*
 # Project-Specific Development Artifacts
 # ==========================================
 
-# Governance files (not needed in internal repo)
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-SECURITY.md
 
 # Task Management (internal only)
 tasks.json
