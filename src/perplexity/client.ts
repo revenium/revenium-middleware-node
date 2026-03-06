@@ -82,7 +82,7 @@ export function GetClient(): ReveniumPerplexity {
     throw new Error(
       "Revenium Perplexity client not initialized. Call Initialize() first.\n\n" +
         "Example:\n" +
-        '  import { Initialize, GetClient } from "revenium-middleware-node-internal/perplexity";\n' +
+        '  import { Initialize, GetClient } from "@revenium/middleware/perplexity";\n' +
         "  Initialize();\n" +
         "  const client = GetClient();",
     );

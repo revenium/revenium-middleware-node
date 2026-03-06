@@ -1,7 +1,7 @@
 {
   "name": "@revenium/middleware",
   "version": "1.0.0",
-  "description": "Unified Revenium middleware for AI provider usage tracking - OpenAI, Anthropic, Google, Perplexity, LiteLLM",
+  "description": "Unified Revenium middleware for AI provider usage tracking - OpenAI, Anthropic, Google, Perplexity, LiteLLM, fal.ai",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.ts",
@@ -76,6 +76,16 @@
         "default": "./dist/cjs/litellm/index.js"
       }
     },
+    "./fal": {
+      "import": {
+        "types": "./dist/types/fal/index.d.ts",
+        "default": "./dist/esm/fal/index.js"
+      },
+      "require": {
+        "types": "./dist/types/fal/index.d.ts",
+        "default": "./dist/cjs/fal/index.js"
+      }
+    },
     "./tools": {
       "import": {
         "types": "./dist/types/_core/tool-metering/index.d.ts",
@@ -107,6 +117,9 @@
       "litellm": [
         "dist/types/litellm/index.d.ts"
       ],
+      "fal": [
+        "dist/types/fal/index.d.ts"
+      ],
       "tools": [
         "dist/types/_core/tool-metering/index.d.ts"
       ]
@@ -126,6 +139,7 @@
     "test:google": "jest --testPathPatterns=tests/unit/google",
     "test:perplexity": "jest --testPathPatterns=tests/unit/perplexity",
     "test:litellm": "jest --testPathPatterns=tests/unit/litellm",
+    "test:fal": "jest --testPathPatterns=tests/unit/fal",
     "test:core": "jest --testPathPatterns=tests/unit/_core",
     "test:integration": "jest --testPathPatterns=tests/integration",
     "test:watch": "jest --watch",
@@ -143,6 +157,8 @@
     "google",
     "perplexity",
     "litellm",
+    "fal",
+    "fal-ai",
     "ai",
     "metering",
     "usage-tracking",
@@ -162,7 +178,8 @@
     "@anthropic-ai/sdk": ">=0.24.0",
     "@google/genai": ">=1.17.0",
     "google-auth-library": ">=10.0.0",
-    "openai": ">=5.0.0"
+    "openai": ">=5.0.0",
+    "@fal-ai/client": ">=1.0.0"
   },
   "peerDependenciesMeta": {
     "openai": {
@@ -176,10 +193,14 @@
     },
     "google-auth-library": {
       "optional": true
+    },
+    "@fal-ai/client": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.55.1",
+    "@fal-ai/client": "^1.9.4",
     "@google/genai": "^1.17.0",
     "@jest/globals": "^30.2.0",
     "@types/jest": "^30.0.0",
