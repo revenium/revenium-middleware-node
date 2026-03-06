@@ -119,23 +119,27 @@ async function handleStreamingResponse(
   stream: any,
   context: {
     requestId: string;
-    model: string;
+    requestModel: string;
     metadata: any;
     requestTime: Date;
     startTime: number;
     requestBody: any;
   },
 ) {
-  const { requestId, model, metadata, requestTime, startTime, requestBody } = context;
+  const { requestId, requestModel, metadata, requestTime, startTime, requestBody } = context;
 
   async function* trackingStream() {
     const chunks: any[] = [];
     let firstTokenTime: number | undefined;
+    let resolvedModel: string | undefined;
 
     try {
       for await (const chunk of stream) {
         if (!firstTokenTime && chunk.type === "content_block_delta") {
           firstTokenTime = Date.now();
+        }
+        if (!resolvedModel && chunk.type === "message_start" && chunk.message?.model) {
+          resolvedModel = chunk.message.model;
         }
         chunks.push(chunk);
         yield chunk;
@@ -143,6 +147,7 @@ async function handleStreamingResponse(
 
       const duration = Date.now() - startTime;
       const timeToFirstToken = firstTokenTime ? firstTokenTime - startTime : undefined;
+      const model = resolvedModel ?? requestModel;
 
       const usage = extractUsageFromStream(chunks);
 
@@ -200,7 +205,7 @@ async function patchedCreateMethod(this: any, params: any, options?: any): Promi
 
       const trackingData: AnthropicTrackingData = {
         requestId,
-        model: params.model,
+        model: response.model ?? params.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
         cacheCreationTokens: usage.cacheCreationTokens,
@@ -222,7 +227,7 @@ async function patchedCreateMethod(this: any, params: any, options?: any): Promi
 
     return handleStreamingResponse(response, {
       requestId,
-      model: params.model,
+      requestModel: params.model,
       metadata,
       requestTime,
       startTime,
@@ -239,6 +244,7 @@ async function* patchedStreamMethod(this: any, params: any, options?: any): Asyn
   const requestTime = new Date();
   const chunks: any[] = [];
   let firstTokenTime: number | undefined;
+  let resolvedModel: string | undefined;
 
   const metadata = params.usageMetadata || {};
   const { usageMetadata: _, ...cleanParams } = params;
@@ -252,23 +258,27 @@ async function* patchedStreamMethod(this: any, params: any, options?: any): Asyn
       if (!firstTokenTime && chunk.type === "content_block_delta") {
         firstTokenTime = Date.now();
       }
+      if (!resolvedModel && chunk.type === "message_start" && chunk.message?.model) {
+        resolvedModel = chunk.message.model;
+      }
       chunks.push(chunk);
       yield chunk;
     }
 
     const duration = Date.now() - startTime;
     const timeToFirstToken = firstTokenTime ? firstTokenTime - startTime : undefined;
+    const model = resolvedModel ?? params.model;
 
     const usage = extractUsageFromStream(chunks);
 
     let reconstructedResponse = undefined;
     if (shouldCapturePrompts(metadata)) {
-      reconstructedResponse = reconstructResponseFromChunks(chunks, params.model);
+      reconstructedResponse = reconstructResponseFromChunks(chunks, model);
     }
 
     const trackingData: AnthropicTrackingData = {
       requestId,
-      model: params.model,
+      model,
       inputTokens: usage.inputTokens,
       outputTokens: usage.outputTokens,
       cacheCreationTokens: usage.cacheCreationTokens,

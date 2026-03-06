@@ -17,7 +17,7 @@ function loadConfigFromEnv(): LiteLLMConfig | null {
     process.env.REVENIUM_METERING_BASE_URL || "https://api.revenium.ai";
   const litellmProxyUrl = process.env.LITELLM_PROXY_URL;
   const litellmApiKey = process.env.LITELLM_API_KEY;
-  const organizationId = process.env.REVENIUM_ORGANIZATION_ID;
+  const organizationName = process.env.REVENIUM_ORGANIZATION_NAME;
   const apiTimeout = process.env.REVENIUM_API_TIMEOUT
     ? parseInt(process.env.REVENIUM_API_TIMEOUT, 10)
     : undefined;
@@ -45,7 +45,7 @@ function loadConfigFromEnv(): LiteLLMConfig | null {
     reveniumMeteringBaseUrl,
     litellmProxyUrl,
     litellmApiKey,
-    organizationId,
+    organizationName,
     apiTimeout,
     failSilent,
     maxRetries,

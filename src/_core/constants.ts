@@ -44,6 +44,7 @@ export const API_ENDPOINTS = {
   AI_COMPLETIONS: "/ai/completions",
   AI_IMAGES: "/ai/images",
   AI_AUDIO: "/ai/audio",
+  AI_VIDEO: "/ai/video",
   TOOL_EVENTS: "/tool/events",
 } as const;
 

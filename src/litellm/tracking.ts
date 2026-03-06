@@ -15,6 +15,7 @@ import {
   detectOperationSubtype,
 } from "../_core/metadata/trace-fields.js";
 import { extractModelSource, extractProvider, extractModelName } from "./provider-mapper.js";
+import type { ReveniumPayload } from "../_core/types/index.js";
 import type {
   LiteLLMUsageMetadata,
   LiteLLMChatCompletionRequest,
@@ -104,7 +105,7 @@ export async function sendReveniumMetrics(data: {
         )
       : null;
 
-  const payload: any = {
+  const payload: ReveniumPayload = {
     stopReason: isEmbedding ? "END" : mapStopReason(data.finishReason, logger),
     costType: "AI",
     isStreamed: isEmbedding ? false : data.isStreamed || false,
@@ -129,7 +130,6 @@ export async function sendReveniumMetrics(data: {
         : now,
     timeToFirstToken: isEmbedding ? 0 : data.timeToFirstToken || Math.round(data.duration),
     middlewareSource: MIDDLEWARE_SOURCE,
-
     traceId: data.usageMetadata?.traceId,
     taskType: data.usageMetadata?.taskType,
     agent: data.usageMetadata?.agent,
@@ -152,18 +152,12 @@ export async function sendReveniumMetrics(data: {
     credentialAlias: data.usageMetadata?.credentialAlias || getCredentialAlias() || undefined,
     traceType: data.usageMetadata?.traceType || getTraceType() || undefined,
     traceName: data.usageMetadata?.traceName || getTraceName() || undefined,
-    ...(Object.keys(attributes).length > 0 && { attributes }),
-    ...(promptData && {
-      systemPrompt: promptData.systemPrompt,
-      inputMessages: promptData.inputMessages,
-      outputResponse: promptData.outputResponse,
-      promptsTruncated: promptData.promptsTruncated,
-    }),
+    attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
+    systemPrompt: promptData?.systemPrompt,
+    inputMessages: promptData?.inputMessages,
+    outputResponse: promptData?.outputResponse,
+    promptsTruncated: promptData?.promptsTruncated,
   };
-
-  Object.keys(payload).forEach((key) => {
-    if (payload[key] === undefined) delete payload[key];
-  });
 
   try {
     await sendToRevenium(payload);

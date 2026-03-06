@@ -41,6 +41,9 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Lock files (not committed for library packages)
+package-lock.json
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
@@ -139,6 +142,11 @@ vite.config.ts.timestamp-*
 # ==========================================
 # Project-Specific Development Artifacts
 # ==========================================
+
+# Governance files (not needed in internal repo)
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+SECURITY.md
 
 # Task Management (internal only)
 tasks.json
