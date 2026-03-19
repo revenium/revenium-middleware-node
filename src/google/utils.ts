@@ -13,6 +13,19 @@ import { GoogleUsageMetadata } from "./types.js";
 
 const MIDDLEWARE_SOURCE = "revenium-google-node";
 
+const ASPECT_RATIO_TO_RESOLUTION: Record<string, string> = {
+  "1:1": "1024x1024",
+  "3:4": "768x1024",
+  "4:3": "1024x768",
+  "9:16": "576x1024",
+  "16:9": "1024x576",
+};
+
+export function mapAspectRatioToResolution(aspectRatio?: string): string {
+  if (!aspectRatio) return "1024x1024";
+  return ASPECT_RATIO_TO_RESOLUTION[aspectRatio] ?? "1024x1024";
+}
+
 export function mapGoogleFinishReason(finishReason: any, defaultReason: string = "END"): string {
   try {
     if (!finishReason || typeof finishReason !== "string" || finishReason.trim() === "") {
@@ -126,6 +139,10 @@ export function mapGoogleUsageMetadata(meta?: GoogleUsageMetadata): UsageMetadat
   if (meta.responseQualityScore !== undefined)
     result.responseQualityScore = meta.responseQualityScore;
   if (meta.capturePrompts !== undefined) result.capturePrompts = meta.capturePrompts;
+  if (meta.agenticJobId) result.agenticJobId = meta.agenticJobId;
+  if (meta.agenticJobName) result.agenticJobName = meta.agenticJobName;
+  if (meta.agenticJobType) result.agenticJobType = meta.agenticJobType;
+  if (meta.agenticJobVersion) result.agenticJobVersion = meta.agenticJobVersion;
 
   if (meta.subscriberId || meta.subscriberEmail || meta.subscriberCredential) {
     result.subscriber = {
