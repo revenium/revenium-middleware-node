@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-03-19
+
+### Added
+
+- Jobs API support with `JobContext` using `AsyncLocalStorage` for agentic workflow tracking
+- Environment variable fallbacks for Jobs API configuration
+- Graceful 409 conflict handling in Jobs API responses
+- fal.ai middleware wrapper with multi-modal metering support (image, video, audio)
+- HATEOAS-driven Jobs API endpoint discovery
+
+### Fixed
+
+- Google Vertex image resolution and quality fields in metering payload
+- VIDEO endpoint routing and circuit breaker wiring
+- Canonical model name from API response for accurate pricing resolution
+- LiteLLM `ReveniumPayload` type safety enforcement
+- API key error messages for clearer diagnostics
+- Internal package reference in Perplexity client error message
+
 ## [1.0.0] - 2025-02-24
 
 ### Added
@@ -26,4 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.0]: https://github.com/revenium/revenium-middleware-node/releases/tag/v1.1.0
 [1.0.0]: https://github.com/revenium/revenium-middleware-node/releases/tag/v1.0.0

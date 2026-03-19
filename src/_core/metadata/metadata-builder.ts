@@ -1,4 +1,6 @@
 import { UsageMetadata } from "../types/index.js";
+import { getJobContext } from "../jobs/job-context.js";
+import { ENV_VARS } from "../constants.js";
 
 interface MetadataFieldConfig {
   source: keyof UsageMetadata;
@@ -23,14 +25,40 @@ const METADATA_FIELD_MAP: MetadataFieldConfig[] = [
       return value;
     },
   },
+  { source: "agenticJobId" },
+  { source: "agenticJobName" },
+  { source: "agenticJobType" },
+  { source: "agenticJobVersion" },
 ];
 
+function getJobFieldsFromEnv(): Partial<
+  Pick<UsageMetadata, "agenticJobId" | "agenticJobName" | "agenticJobType" | "agenticJobVersion">
+> {
+  const result: Record<string, string> = {};
+  const envId = process.env[ENV_VARS.AGENTIC_JOB_ID];
+  const envName = process.env[ENV_VARS.AGENTIC_JOB_NAME];
+  const envType = process.env[ENV_VARS.AGENTIC_JOB_TYPE];
+  const envVersion = process.env[ENV_VARS.AGENTIC_JOB_VERSION];
+  if (envId) result.agenticJobId = envId;
+  if (envName) result.agenticJobName = envName;
+  if (envType) result.agenticJobType = envType;
+  if (envVersion) result.agenticJobVersion = envVersion;
+  return result;
+}
+
 export function buildMetadataFields(usageMetadata?: UsageMetadata): Record<string, unknown> {
-  if (!usageMetadata) return {};
+  const envJobFields = getJobFieldsFromEnv();
+  const jobContext = getJobContext();
+  const merged: UsageMetadata = { ...envJobFields, ...jobContext, ...usageMetadata };
+
+  if (!usageMetadata && !Object.keys(jobContext).length && !Object.keys(envJobFields).length) {
+    return {};
+  }
+
   const result: Record<string, unknown> = {};
 
   for (const config of METADATA_FIELD_MAP) {
-    const value = usageMetadata[config.source];
+    const value = merged[config.source];
     if (value === undefined) continue;
 
     if (config.source === "organizationId" || config.source === "productId") {
@@ -42,12 +70,12 @@ export function buildMetadataFields(usageMetadata?: UsageMetadata): Record<strin
     result[targetField] = transformedValue;
   }
 
-  if (usageMetadata.organizationName || usageMetadata.organizationId) {
-    result.organizationName = usageMetadata.organizationName || usageMetadata.organizationId;
+  if (merged.organizationName || merged.organizationId) {
+    result.organizationName = merged.organizationName || merged.organizationId;
   }
 
-  if (usageMetadata.productName || usageMetadata.productId) {
-    result.productName = usageMetadata.productName || usageMetadata.productId;
+  if (merged.productName || merged.productId) {
+    result.productName = merged.productName || merged.productId;
   }
 
   return result;
