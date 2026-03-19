@@ -36,3 +36,33 @@ export {
 export { validateConfig } from "./_core/config/validator.js";
 
 export { mapStopReason } from "./_core/stop-reason-mapper.js";
+
+export type {
+  JobOutcome,
+  JobResource,
+  ExecutionStatus,
+  OutcomeType,
+  JobROIResource,
+  JobTimelineResource,
+  JobTimelineEvent,
+  ConversionFunnelResource,
+  ListJobsParams,
+  ConversionFunnelParams,
+  PageInfo,
+  PagedResponse,
+} from "./_core/types/jobs.js";
+export {
+  reportJobOutcome,
+  listJobs,
+  getJob,
+  getJobTypes,
+  getJobROI,
+  getJobTransactions,
+  getConversionFunnel,
+  JobContext,
+  getJobContext,
+  setJobContext,
+  clearJobContext,
+  runWithJobContext,
+} from "./_core/jobs/index.js";
+export type { JobContextData, JobContextOptions } from "./_core/jobs/index.js";

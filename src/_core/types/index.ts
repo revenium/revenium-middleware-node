@@ -23,6 +23,10 @@ export interface UsageMetadata {
   responseQualityScore?: number;
   agent?: string;
   capturePrompts?: boolean;
+  agenticJobId?: string;
+  agenticJobName?: string;
+  agenticJobType?: string;
+  agenticJobVersion?: string;
 }
 
 export type OperationType =
@@ -112,6 +116,10 @@ export interface ReveniumPayload {
   credentialAlias?: string;
   traceType?: string;
   traceName?: string;
+  agenticJobId?: string;
+  agenticJobName?: string;
+  agenticJobType?: string;
+  agenticJobVersion?: string;
   systemPrompt?: string;
   inputMessages?: string;
   outputResponse?: string;
