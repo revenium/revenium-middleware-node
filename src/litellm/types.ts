@@ -160,6 +160,10 @@ export interface LiteLLMUsageMetadata {
   traceName?: string;
   capturePrompts?: boolean;
   maxPromptSize?: number;
+  agenticJobId?: string;
+  agenticJobName?: string;
+  agenticJobType?: string;
+  agenticJobVersion?: string;
 }
 
 export interface LiteLLMConfig {

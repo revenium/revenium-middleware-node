@@ -29,6 +29,10 @@ export interface GoogleUsageMetadata {
   credentialAlias?: string;
   traceType?: string;
   traceName?: string;
+  agenticJobId?: string;
+  agenticJobName?: string;
+  agenticJobType?: string;
+  agenticJobVersion?: string;
 }
 
 export interface IGoogleResponse {

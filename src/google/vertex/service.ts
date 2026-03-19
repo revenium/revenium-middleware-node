@@ -19,7 +19,12 @@ import {
   IVideoExtendRequest,
   IVideoUpscaleRequest,
 } from "../types.js";
-import { trackGoogleUsageAsync, generateTransactionId, mapGoogleUsageMetadata } from "../utils.js";
+import {
+  trackGoogleUsageAsync,
+  generateTransactionId,
+  mapGoogleUsageMetadata,
+  mapAspectRatioToResolution,
+} from "../utils.js";
 
 const MIDDLEWARE_SOURCE = "revenium-google-node";
 
@@ -284,7 +289,12 @@ export class VertexAIService {
     const imagePayload = buildImagePayload(
       "generation",
       { data: data.predictions || [] },
-      { n: request.numberOfImages || 1, model: request.model, size: request.aspectRatio },
+      {
+        n: request.numberOfImages || 1,
+        model: request.model,
+        size: mapAspectRatioToResolution(request.aspectRatio),
+        quality: "standard",
+      },
       startTime,
       duration,
       "Google",
@@ -370,7 +380,12 @@ export class VertexAIService {
     const imagePayload = buildImagePayload(
       "edit",
       { data: data.predictions || [] },
-      { n: request.numberOfImages || 1, model: request.model },
+      {
+        n: request.numberOfImages || 1,
+        model: request.model,
+        size: "1024x1024",
+        quality: "standard",
+      },
       startTime,
       duration,
       "Google",
@@ -445,7 +460,7 @@ export class VertexAIService {
     const imagePayload = buildImagePayload(
       "variation",
       { data: data.predictions || [] },
-      { n: 1, model: request.model },
+      { n: 1, model: request.model, quality: "standard" },
       startTime,
       duration,
       "Google",
