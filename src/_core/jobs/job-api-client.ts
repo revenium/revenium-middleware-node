@@ -1,5 +1,5 @@
 import { getConfig, getLogger } from "../config/manager.js";
-import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS } from "../constants.js";
+import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS, ENV_VARS } from "../constants.js";
 import type {
   JobOutcome,
   JobResource,
@@ -18,7 +18,7 @@ function buildJobRequest(
 ): { url: string; headers: Record<string, string> } {
   const config = getConfig();
 
-  const resolvedTeamId = teamId || config?.teamId;
+  const resolvedTeamId = teamId || config?.teamId || process.env[ENV_VARS.TEAM_ID];
   if (!resolvedTeamId) {
     throw new Error(
       "teamId is required: provide it as a parameter or set REVENIUM_TEAM_ID environment variable",
