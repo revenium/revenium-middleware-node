@@ -45,5 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
-[1.1.0]: https://github.com/revenium/revenium-middleware-node/releases/tag/v1.1.0
-[1.0.0]: https://github.com/revenium/revenium-middleware-node/releases/tag/v1.0.0
+[1.1.0]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.0
+[1.0.0]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.0.0

@@ -21,8 +21,8 @@ Thank you for your interest in contributing to @revenium/middleware!
 ## Development Setup
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/revenium-middleware-node.git
-cd revenium-middleware-node
+git clone https://github.com/YOUR-USERNAME/revenium-node-sdk.git
+cd revenium-node-sdk
 
 npm install
 
