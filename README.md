@@ -55,7 +55,7 @@ npm install @fal-ai/client            # For fal.ai
 
 ### Configuration
 
-Create a `.env` file in your project root. See [`.env.example`](https://github.com/revenium/revenium-middleware-node/blob/HEAD/.env.example) for all available options.
+Create a `.env` file in your project root. See [`.env.example`](https://github.com/revenium/revenium-node-sdk/blob/HEAD/.env.example) for all available options.
 
 Minimum required:
 
@@ -421,7 +421,7 @@ Environment variables for distributed tracing and analytics:
 | `LITELLM_API_KEY`                | LiteLLM       | LiteLLM proxy API key                             |
 | `FAL_KEY`                        | fal.ai        | fal.ai API key                                    |
 
-See [`.env.example`](https://github.com/revenium/revenium-middleware-node/blob/HEAD/.env.example) for the complete list with all optional configuration.
+See [`.env.example`](https://github.com/revenium/revenium-node-sdk/blob/HEAD/.env.example) for the complete list with all optional configuration.
 
 ## Troubleshooting
 
@@ -475,25 +475,25 @@ npm run test:coverage   # Run tests with coverage
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/revenium/revenium-middleware-node/blob/HEAD/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/revenium/revenium-node-sdk/blob/HEAD/CONTRIBUTING.md)
 
 ## Code of Conduct
 
-See [CODE_OF_CONDUCT.md](https://github.com/revenium/revenium-middleware-node/blob/HEAD/CODE_OF_CONDUCT.md)
+See [CODE_OF_CONDUCT.md](https://github.com/revenium/revenium-node-sdk/blob/HEAD/CODE_OF_CONDUCT.md)
 
 ## Security
 
-See [SECURITY.md](https://github.com/revenium/revenium-middleware-node/blob/HEAD/SECURITY.md)
+See [SECURITY.md](https://github.com/revenium/revenium-node-sdk/blob/HEAD/SECURITY.md)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/revenium/revenium-middleware-node/blob/HEAD/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/revenium/revenium-node-sdk/blob/HEAD/LICENSE) file for details.
 
 ## Support
 
 - **Website**: [www.revenium.ai](https://www.revenium.ai)
 - **Documentation**: [docs.revenium.io](https://docs.revenium.io)
-- **Issues**: [Report bugs or request features](https://github.com/revenium/revenium-middleware-node/issues)
+- **Issues**: [Report bugs or request features](https://github.com/revenium/revenium-node-sdk/issues)
 - **Email**: support@revenium.io
 
 ---
