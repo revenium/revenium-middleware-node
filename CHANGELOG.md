@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-04-02
+
+### Changed
+
+- Renamed package repository from `revenium-middleware-node` to `revenium-node-sdk`
+- Added examples directory replicating Python SDK structure
+
+### Fixed
+
+- Anthropic streaming runtime error in embed example
+- `REVENIUM_TEAM_ID` environment variable fallback in `buildJobRequest`
+- Prettier formatting in `normalizePagedResponse`
+
 ## [1.1.0] - 2026-03-19
 
 ### Added
@@ -45,5 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.1]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.1
 [1.1.0]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.0
 [1.0.0]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.0.0
