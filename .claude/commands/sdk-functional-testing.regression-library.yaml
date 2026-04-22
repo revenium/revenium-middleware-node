@@ -1,0 +1,35 @@
+# SDK Functional Testing — Regression Library
+#
+# Each entry represents a previously-fixed bug that must not silently
+# reappear. The regression agent (Wave 3) iterates these entries and
+# asserts the fix still holds.
+#
+# Entry format:
+#   ticket:        Ticket ID (NODE-NNN or LINEAR-NNN)
+#   title:         Human-readable description
+#   class:         Bug class letter A-M from sdk-functional-testing.bug-classes.yaml
+#   providers:     List of affected providers (or [all])
+#   domain:        metering | config | resilience | cross-cutting
+#   fixed_in:      List of commit SHAs that fixed the bug
+#   resolved_on:   ISO date string (YYYY-MM-DD) or null if unfixed
+#   reproduction:
+#     provider:    Provider name
+#     action:      SDK method or entry point exercised
+#     mode:        normal | stream | null
+#     setup:       Optional setup prose
+#     assertion:
+#       type:      Assertion type (metering-accuracy, response-fidelity,
+#                  config-validation, error-propagation, security-check,
+#                  lifecycle-check, performance-bound, schema-validation,
+#                  provider-detection, streaming-integrity, concurrency-safety)
+#       field:     Field or property under test
+#       expected:  Expected behavior description
+#   confidence:    high | medium | low
+#   tags:          Freeform tags for filtering
+#   notes:         Optional notes
+#
+# When fixing a bug, add a new entry here and reference the class letter
+# in the PR body. The regression agent will automatically pick it up on
+# the next audit run.
+
+entries: []

@@ -1,0 +1,148 @@
+# SDK Test Coverage Matrix
+#
+# Axes:
+#   - providers   (8 AI providers supported by @revenium/middleware)
+#   - case_types  (12 case types derived from the adapted bug classes)
+#
+# Each cell is one of:
+#   - uncovered : no test exists yet (default scaffold state)
+#   - covered   : test exists and passes in the Jest suite
+#   - n/a       : intentionally out of scope for this provider
+#
+# 8 providers x 12 case_types = 96 cells.
+# Current state: scaffold — all cells uncovered pending first audit run.
+
+case_types:
+  - happy-path
+  - error-handling
+  - streaming
+  - config-override
+  - boundary
+  - security-lint
+  - metering-accuracy
+  - provider-drift
+  - concurrency
+  - latency
+  - interception-lifecycle
+  - regression
+
+providers:
+  openai:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  azure:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  anthropic:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  google-genai:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  google-vertex:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  perplexity:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  litellm:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: uncovered
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered
+
+  fal:
+    cells:
+      happy-path: uncovered
+      error-handling: uncovered
+      streaming: n/a
+      config-override: uncovered
+      boundary: uncovered
+      security-lint: uncovered
+      metering-accuracy: uncovered
+      provider-drift: uncovered
+      concurrency: uncovered
+      latency: uncovered
+      interception-lifecycle: uncovered
+      regression: uncovered

@@ -1,0 +1,126 @@
+# SDK Functional Testing — Bug-class taxonomy
+#
+# Adapted from revenium-mcp-internal's MCP taxonomy for the Node.js
+# middleware SDK context. Each class identifies a distinct bug mechanism
+# pattern relevant to a multi-provider AI middleware that intercepts
+# API calls for usage metering.
+#
+# The PR-creation coverage hook (.claude/hooks/pr-creation-coverage-check.sh)
+# references this file when asking bug-fix PR authors to classify their fix.
+#
+# When a new class is identified, append a new entry here and reference
+# the originating ticket.
+
+classes:
+  - letter: A
+    name: Instrumentation Coverage Gaps
+    definition: >
+      Middleware not applied to a provider method or endpoint that should
+      be intercepted. The provider call succeeds but usage is never
+      metered. Only detectable by comparing the set of intercepted
+      surfaces against the provider SDK's full public API.
+    example_tickets: []
+
+  - letter: B
+    name: Metering Accuracy Errors
+    definition: >
+      Wrong token counts, double-counting on retries or streaming chunks,
+      missing usage records, or incorrect model/provider attribution in
+      the metering payload. The middleware intercepts the call but the
+      emitted usage data is factually wrong.
+    example_tickets: []
+
+  - letter: C
+    name: Request/Response Fidelity Breakages
+    definition: >
+      SDK unexpectedly alters provider semantics visible to the caller:
+      wrong status codes, mutated response payloads, altered headers,
+      swallowed errors, or changed streaming chunk boundaries. The
+      middleware must be transparent to the application.
+    example_tickets: []
+
+  - letter: D
+    name: Configuration / Environment Misbehavior
+    definition: >
+      Misinterpretation of env vars, config precedence issues, ignored
+      overrides, missing defaults, or initialization failures that
+      silently disable metering. Includes Azure endpoint resolution,
+      provider auto-detection, and credential loading bugs.
+    example_tickets: []
+
+  - letter: E
+    name: Error Handling / Recovery Issues
+    definition: >
+      Crashes on provider errors, unhandled promise rejections, incorrect
+      retry behavior, timeout mishandling, or errors swallowed silently
+      when they should propagate. Includes circuit breaker state bugs.
+    example_tickets: []
+
+  - letter: F
+    name: Provider Compatibility / Drift
+    definition: >
+      SDK breaks when a provider updates their API or client library.
+      New response fields cause runtime errors, renamed endpoints go
+      undetected, or version-specific behavior is not handled. Each
+      provider has its own API surface and update cadence.
+    example_tickets: []
+
+  - letter: G
+    name: Performance / Resource Overhead
+    definition: >
+      Excessive latency added by interception, memory leaks from
+      uncollected references, O(n^2) copies during payload inspection,
+      or pathological CPU usage under load. The middleware must add
+      negligible overhead to the application.
+    example_tickets: []
+
+  - letter: H
+    name: Security / Privacy Violations
+    definition: >
+      API keys appearing in logs, PII not redacted from metering
+      payloads, credentials stored insecurely, Authorization headers
+      leaked in debug output, or TLS validation bypassed.
+    example_tickets: []
+
+  - letter: I
+    name: Concurrency / Lifecycle Bugs
+    definition: >
+      Race conditions in concurrent requests, double initialization,
+      cross-request state bleed in multi-tenant scenarios, AsyncLocalStorage
+      context loss, or improper teardown leaving ghost listeners.
+    example_tickets: []
+
+  - letter: J
+    name: Host App Integration Issues
+    definition: >
+      SDK breaks in specific deployment patterns: serverless (Lambda
+      cold/warm starts), edge runtimes, Next.js middleware, Express
+      middleware chains, or ESM/CJS module resolution conflicts.
+    example_tickets: []
+
+  - letter: K
+    name: Observability / Diagnostics Defects
+    definition: >
+      Missing or incorrect logs, inconsistent metric IDs or timestamps,
+      misleading debug output, REVENIUM_PRINT_SUMMARY producing wrong
+      data, or silent failures in the metering pipeline that leave no
+      trace for debugging.
+    example_tickets: []
+
+  - letter: L
+    name: Regression Reintroductions
+    definition: >
+      Bugs previously fixed that reappear due to refactoring, dependency
+      updates, or merge conflicts. This meta-class tracks invariant
+      violations across versions. Every entry should reference the
+      original fix commit.
+    example_tickets: []
+
+  - letter: M
+    name: Contract / Documentation Violations
+    definition: >
+      SDK behavior diverges from documented API contract in README,
+      JSDoc, or type definitions. Includes "no-op if disabled" actually
+      still metering, documented options being silently ignored, and
+      type signatures that don't match runtime behavior.
+    example_tickets: []

@@ -1,0 +1,177 @@
+name: PR Coverage Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  coverage-check:
+    name: Coverage artifacts declared
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch origin "$BASE_REF" --depth=100
+
+      - name: Compute diff signals
+        id: diff
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          BASE="origin/${BASE_REF}"
+
+          ADDED_FILES=$(git diff --name-only --diff-filter=A "${BASE}...HEAD" || true)
+
+          NEW_PROVIDER_FILES=$(echo "${ADDED_FILES}" \
+            | grep -E '^src/(openai|anthropic|google|perplexity|litellm|fal|_core)/.+\.ts$' \
+            | grep -v '__tests__' \
+            || true)
+          if [ -n "${NEW_PROVIDER_FILES}" ]; then
+            echo "new_provider_file=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "new_provider_file=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          EXPORT_DIFF=$(git diff "${BASE}...HEAD" -- 'src/*/index.ts' 'src/index.ts' || true)
+          if echo "${EXPORT_DIFF}" | grep -E '^\+\s*export ' >/dev/null 2>&1; then
+            echo "new_export=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "new_export=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          MATRIX_CHANGED=$(git diff --name-only "${BASE}...HEAD" \
+            | grep -E '^\.claude/commands/sdk-test-coverage-matrix\.yaml$' \
+            || true)
+          if [ -n "${MATRIX_CHANGED}" ]; then
+            echo "matrix_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Evaluate coverage artifacts
+        id: evaluate
+        uses: actions/github-script@v7
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          NEW_PROVIDER_FILE: ${{ steps.diff.outputs.new_provider_file }}
+          NEW_EXPORT: ${{ steps.diff.outputs.new_export }}
+          MATRIX_CHANGED: ${{ steps.diff.outputs.matrix_changed }}
+        with:
+          script: |
+            const normalise = (v) => (!v || v === 'null') ? '' : v;
+            const body = normalise(process.env.PR_BODY);
+            const title = normalise(process.env.PR_TITLE);
+            const newProviderFile = process.env.NEW_PROVIDER_FILE === 'true';
+            const newExport = process.env.NEW_EXPORT === 'true';
+            const matrixChanged = process.env.MATRIX_CHANGED === 'true';
+
+            const failures = [];
+
+            const bugFixTitleRe = /^fix(?:\([^)]*\))?!?:/i;
+            const closesIssueRe = /\b(?:resolves|fixes|closes)\s+#\d+/i;
+            const looksLikeBugFix =
+              bugFixTitleRe.test(title) ||
+              closesIssueRe.test(body);
+
+            if (looksLikeBugFix) {
+              const classRe = /^\s*\**\s*class\s*\**\s*:\s*\**\s*[A-M]\b/im;
+              if (!classRe.test(body)) {
+                failures.push(
+                  "Missing **Bug class** (A-M) in PR body.\n" +
+                  "This PR looks like a bug fix (the PR title starts " +
+                  "with `fix:` or the PR body references " +
+                  "`resolves #`/`fixes #`/`closes #`).\n" +
+                  "Please add a line like `Class: D` (letter A-M) under the " +
+                  "\"Bug class\" heading.\n" +
+                  "Bug class taxonomy: " +
+                  "[.claude/commands/sdk-functional-testing.bug-classes.yaml]" +
+                  "(../blob/" + context.payload.pull_request.base.ref +
+                  "/.claude/commands/sdk-functional-testing.bug-classes.yaml)"
+                );
+              }
+            }
+
+            const addsNewSurface = newProviderFile || newExport;
+            if (addsNewSurface && !matrixChanged) {
+              const section = body.match(
+                /^#{1,6}\s+matrix cells added[\s\S]*?(?=\n#{1,6}\s|\n---|\s*$)/im
+              );
+              let hasCells = false;
+              if (section) {
+                const lines = section[0].split('\n');
+                for (const line of lines) {
+                  const m = line.match(/^\s*[-*]\s+(.+?)\s*$/);
+                  if (!m) continue;
+                  const content = m[1].trim();
+                  if (!content) continue;
+                  if (content.startsWith('<!--')) continue;
+                  if (/^<.*>$/.test(content)) continue;
+                  if (/^(todo|tbd|n\/a|na)\b/i.test(content)) continue;
+                  hasCells = true;
+                  break;
+                }
+              }
+              if (!hasCells) {
+                failures.push(
+                  "PR adds a new provider file or exported function but does " +
+                  "not update `.claude/commands/sdk-test-coverage-matrix.yaml` " +
+                  "and the PR body's \"Matrix cells added\" section is empty.\n" +
+                  "Please either update the matrix file or list the newly " +
+                  "covered provider x function x case-type cells in the PR body.\n" +
+                  "Matrix file: " +
+                  "[.claude/commands/sdk-test-coverage-matrix.yaml]" +
+                  "(../blob/" + context.payload.pull_request.base.ref +
+                  "/.claude/commands/sdk-test-coverage-matrix.yaml)"
+                );
+              }
+            }
+
+            core.setOutput('failed', failures.length > 0 ? 'true' : 'false');
+            core.setOutput(
+              'message',
+              failures.length > 0 ? failures.join('\n\n---\n\n') : ''
+            );
+
+            if (failures.length > 0) {
+              core.warning("Coverage-check issues:\n" + failures.join('\n\n'));
+            } else {
+              core.info("Coverage check passed.");
+            }
+
+      - name: Comment on PR (advisory)
+        if: steps.evaluate.outputs.failed == 'true'
+        uses: actions/github-script@v7
+        env:
+          COVERAGE_MESSAGE: ${{ steps.evaluate.outputs.message }}
+        with:
+          script: |
+            const message = process.env.COVERAGE_MESSAGE || '';
+            const header =
+              "**PR coverage check (advisory)**\n\n" +
+              "This check is **advisory for the first ~2 weeks** and will " +
+              "become required after calibration.\n\n";
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: header + message,
+            });
+
+      - name: Warn on missing coverage (advisory -- does not fail the job)
+        if: steps.evaluate.outputs.failed == 'true'
+        run: |
+          echo "::warning::PR coverage check advisory warning. See the bot comment on the PR for details."
+          exit 0
