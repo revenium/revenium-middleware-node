@@ -56,7 +56,13 @@ async function main() {
         traceId: 'session-' + Date.now(),
 
         // Quality metrics
-        responseQualityScore: 0.95  // 0.0-1.0 scale
+        responseQualityScore: 0.95,  // 0.0-1.0 scale
+
+        // Agentic job tracking
+        agenticJobId: 'job-abc123',
+        agenticJobName: 'Process Loan Application',
+        agenticJobType: 'loan-processing',
+        agenticJobVersion: '1.0.0'
       }
     );
     */

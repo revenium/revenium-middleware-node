@@ -9,6 +9,10 @@ async function main() {
   const metadata: UsageMetadata = {
     organizationName: "org-getting-started",
     productName: "prod-perplexity-getting-started",
+    // agenticJobId: "job-abc123",
+    // agenticJobName: "Process Loan Application",
+    // agenticJobType: "loan-processing",
+    // agenticJobVersion: "1.0.0",
   };
 
   // Create a simple chat completion

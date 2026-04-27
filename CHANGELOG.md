@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-04-27
+
+### Added
+
+- Support for new `rev_` API key prefix (covers `rev_mk_`, `rev_sk_`, and future key types)
+- Client-side cost enforcement engine with polling, rule evaluation, and circuit breaker integration
+- `CostLimitExceeded` error class for enforcement rule violations
+- E2E smoke test script
+
+### Changed
+
+- API key validator now accepts both `hak_` (legacy) and `rev_` (new) prefixes
+- Config loader reads `REVENIUM_ENFORCEMENT_BASE_URL` environment variable
+- `ReveniumConfig` type extended with `reveniumTeamId` and `reveniumEnforcementBaseUrl` fields
+
 ## [1.1.2] - 2026-04-02
 
 ### Changed
@@ -61,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.3]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.3
 [1.1.2]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.2
 [1.1.1]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.1
 [1.1.0]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.0

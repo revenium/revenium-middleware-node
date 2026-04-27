@@ -57,3 +57,7 @@ export {
   clearToolContext,
   runWithToolContext,
 } from "../_core/tool-metering/index.js";
+
+export { CostLimitExceeded } from "../_core/resilience/error-handler.js";
+
+export type { EnforcementRule } from "../_core/enforcement/cache.js";

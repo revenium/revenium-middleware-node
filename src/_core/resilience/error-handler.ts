@@ -61,6 +61,35 @@ export class StreamProcessingError extends ReveniumError {
   }
 }
 
+export class CostLimitExceeded extends ReveniumError {
+  // Field names mirror the server's CompiledEnforcementRule (threshold,
+  // currentValue, periodType) so SDK + UI + backend parse the same wire
+  // shape. `ruleId` is stringified for JSON-safe structured logging.
+  public readonly ruleId: string;
+  public readonly threshold: number;
+  public readonly currentValue: number;
+  public readonly periodType: string;
+
+  constructor(
+    ruleId: string,
+    threshold: number,
+    currentValue: number,
+    periodType: string,
+    context?: Record<string, unknown>,
+  ) {
+    super(
+      `Cost limit exceeded: $${currentValue.toFixed(2)} of $${threshold.toFixed(2)} ${periodType.toLowerCase()} limit reached`,
+      "COST_LIMIT_EXCEEDED",
+      context,
+    );
+    this.name = "CostLimitExceeded";
+    this.ruleId = ruleId;
+    this.threshold = threshold;
+    this.currentValue = currentValue;
+    this.periodType = periodType;
+  }
+}
+
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === "string") return error;

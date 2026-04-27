@@ -30,7 +30,7 @@ function loadFalConfigFromEnv(): FalConfig | null {
     organizationId: process.env.REVENIUM_ORGANIZATION_ID,
     debug: process.env.REVENIUM_DEBUG === "true",
     printSummary: coreConfig.printSummary,
-    teamId: coreConfig.teamId,
+    teamId: coreConfig.reveniumTeamId,
     capturePrompts: coreConfig.capturePrompts,
     failSilent: process.env.REVENIUM_FAIL_SILENT !== "false",
   };
@@ -68,7 +68,7 @@ export function Initialize(config?: Partial<FalConfig>): void {
     reveniumBaseUrl: finalConfig.reveniumBaseUrl,
     debug: finalConfig.debug,
     printSummary: finalConfig.printSummary,
-    teamId: finalConfig.teamId,
+    reveniumTeamId: finalConfig.teamId,
     capturePrompts: finalConfig.capturePrompts,
     maxPromptSize: finalConfig.maxPromptSize,
     failSilent: finalConfig.failSilent,

@@ -39,11 +39,11 @@ async function fetchCompletionMetrics(
   const config = getConfig();
   const logger = getLogger();
   if (!config) return null;
-  if (!config.teamId) return null;
+  if (!config.reveniumTeamId) return null;
 
   const baseUrl = (config.reveniumBaseUrl || DEFAULT_REVENIUM_BASE_URL).replace(/\/+$/, "");
   const url = `${baseUrl}/profitstream/v2/api/sources/metrics/ai/completions`;
-  const urlWithParams = `${url}?teamId=${encodeURIComponent(config.teamId)}&transactionId=${encodeURIComponent(transactionId)}`;
+  const urlWithParams = `${url}?teamId=${encodeURIComponent(config.reveniumTeamId)}&transactionId=${encodeURIComponent(transactionId)}`;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -114,7 +114,7 @@ function formatJsonSummary(payload: ReveniumPayload, metrics?: CompletionMetrics
   };
 
   if (summary.cost === null) {
-    summary.costStatus = config?.teamId ? "pending" : "unavailable";
+    summary.costStatus = config?.reveniumTeamId ? "pending" : "unavailable";
   }
 
   if (payload.traceId) summary.traceId = payload.traceId;
@@ -137,7 +137,7 @@ function formatHumanSummary(payload: ReveniumPayload, metrics?: CompletionMetric
     console.log(`\nCost: $${metrics.totalCost.toFixed(6)}`);
   } else {
     const config = getConfig();
-    if (!config?.teamId) {
+    if (!config?.reveniumTeamId) {
       console.log(`\nCost: Set REVENIUM_TEAM_ID in .env to see pricing`);
     } else {
       console.log(`\nCost: (pending aggregation)`);
@@ -162,7 +162,7 @@ export function printUsageSummary(payload: ReveniumPayload): void {
 
   const printFn = format === "json" ? formatJsonSummary : formatHumanSummary;
 
-  if (config?.teamId && payload.transactionId) {
+  if (config?.reveniumTeamId && payload.transactionId) {
     fetchCompletionMetrics(payload.transactionId)
       .then((metrics) => {
         try {

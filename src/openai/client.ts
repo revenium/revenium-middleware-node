@@ -3,6 +3,7 @@ import { Config } from "../_core/types/index.js";
 import { getLogger, getConfig, setConfig, initializeConfig } from "../_core/config/manager.js";
 import { validateConfig } from "../_core/config/validator.js";
 import { DEFAULT_REVENIUM_BASE_URL } from "../_core/constants.js";
+import { startEnforcementPolling, stopEnforcementPolling } from "../_core/enforcement/engine.js";
 import {
   ChatInterface,
   EmbeddingsInterface,
@@ -133,6 +134,8 @@ export function Initialize(config?: Partial<OpenAIConfig>): void {
 
   const providerInfo = detectProviderFromConfig(finalConfig);
   globalClient = new ReveniumOpenAI(finalConfig, providerInfo.provider);
+
+  startEnforcementPolling();
 }
 
 export function GetClient(): ReveniumOpenAI {
@@ -153,6 +156,7 @@ export function IsInitialized(): boolean {
 }
 
 export function Reset(): void {
+  stopEnforcementPolling();
   globalClient = null;
 }
 

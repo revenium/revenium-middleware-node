@@ -18,7 +18,7 @@ function buildJobRequest(
 ): { url: string; headers: Record<string, string> } {
   const config = getConfig();
 
-  const resolvedTeamId = teamId || config?.teamId || process.env[ENV_VARS.TEAM_ID];
+  const resolvedTeamId = teamId || config?.reveniumTeamId || process.env[ENV_VARS.TEAM_ID];
   if (!resolvedTeamId) {
     throw new Error(
       "teamId is required: provide it as a parameter or set REVENIUM_TEAM_ID environment variable",
