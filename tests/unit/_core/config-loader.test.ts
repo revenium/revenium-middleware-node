@@ -61,11 +61,18 @@ describe("loadConfigFromEnv", () => {
     expect(config!.printSummary).toBe("human");
   });
 
-  it("reads teamId", () => {
+  it("reads reveniumTeamId from REVENIUM_TEAM_ID", () => {
     process.env[ENV_VARS.REVENIUM_API_KEY] = "hak_tenant_abc";
     process.env[ENV_VARS.TEAM_ID] = "team-42";
     const config = loadConfigFromEnv();
-    expect(config!.teamId).toBe("team-42");
+    expect(config!.reveniumTeamId).toBe("team-42");
+  });
+
+  it("reads reveniumEnforcementBaseUrl from REVENIUM_ENFORCEMENT_BASE_URL", () => {
+    process.env[ENV_VARS.REVENIUM_API_KEY] = "hak_tenant_abc";
+    process.env[ENV_VARS.ENFORCEMENT_BASE_URL] = "https://enforce.api";
+    const config = loadConfigFromEnv();
+    expect(config!.reveniumEnforcementBaseUrl).toBe("https://enforce.api");
   });
 
   it("parses capturePrompts", () => {
