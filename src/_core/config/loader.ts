@@ -50,7 +50,8 @@ export function loadConfigFromEnv(): ReveniumConfig | null {
     DEFAULT_REVENIUM_BASE_URL;
 
   const printSummary = parsePrintSummaryValue(process.env[ENV_VARS.PRINT_SUMMARY]);
-  const teamId = process.env[ENV_VARS.TEAM_ID];
+  const reveniumTeamId = process.env[ENV_VARS.TEAM_ID];
+  const reveniumEnforcementBaseUrl = process.env[ENV_VARS.ENFORCEMENT_BASE_URL];
   const capturePromptsEnv = process.env[ENV_VARS.CAPTURE_PROMPTS];
 
   if (!reveniumApiKey) return null;
@@ -59,7 +60,8 @@ export function loadConfigFromEnv(): ReveniumConfig | null {
     reveniumApiKey,
     reveniumBaseUrl,
     printSummary,
-    teamId,
+    reveniumTeamId,
+    reveniumEnforcementBaseUrl,
   };
 
   if (capturePromptsEnv !== undefined) {

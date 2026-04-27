@@ -396,7 +396,7 @@ Environment variables for distributed tracing and analytics:
 
 | Variable                     | Required | Description                                                |
 | ---------------------------- | -------- | ---------------------------------------------------------- |
-| `REVENIUM_METERING_API_KEY`  | Yes      | Revenium API key (starts with `hak_`)                      |
+| `REVENIUM_METERING_API_KEY`  | Yes      | Revenium API key (starts with `hak_` or `rev_`)            |
 | `REVENIUM_METERING_BASE_URL` | No       | Revenium API endpoint (default: `https://api.revenium.ai`) |
 | `REVENIUM_DEBUG`             | No       | Enable debug logging (`true`/`false`)                      |
 | `REVENIUM_PRINT_SUMMARY`     | No       | Terminal summary (`true`, `human`, `json`, `false`)        |

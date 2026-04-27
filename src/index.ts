@@ -66,3 +66,11 @@ export {
   runWithJobContext,
 } from "./_core/jobs/index.js";
 export type { JobContextData, JobContextOptions } from "./_core/jobs/index.js";
+
+export { CostLimitExceeded } from "./_core/resilience/error-handler.js";
+
+export { startEnforcementPolling, stopEnforcementPolling } from "./_core/enforcement/engine.js";
+
+export { enforcePreCallRules } from "./_core/enforcement/evaluator.js";
+
+export type { EnforcementRule } from "./_core/enforcement/cache.js";

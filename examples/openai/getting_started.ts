@@ -9,6 +9,10 @@ async function main() {
   const metadata = {
     organizationName: "org-getting-started-demo",
     productName: "prod-getting-started",
+    // agenticJobId: "job-abc123",
+    // agenticJobName: "Process Loan Application",
+    // agenticJobType: "loan-processing",
+    // agenticJobVersion: "1.0.0",
   };
 
   const params = {

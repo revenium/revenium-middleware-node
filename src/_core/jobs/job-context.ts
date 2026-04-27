@@ -94,7 +94,7 @@ export class JobContext {
     if (paramTeamId) return paramTeamId;
 
     const config = getConfig();
-    if (config?.teamId) return config.teamId;
+    if (config?.reveniumTeamId) return config.reveniumTeamId;
 
     const envTeamId = process.env[ENV_VARS.TEAM_ID];
     if (envTeamId) return envTeamId;

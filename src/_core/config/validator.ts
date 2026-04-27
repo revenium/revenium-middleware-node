@@ -7,8 +7,11 @@ export function validateConfig(config: ReveniumConfig): void {
     );
   }
 
-  if (!config.reveniumApiKey.startsWith("hak_")) {
-    throw new Error('Invalid Revenium API key format. Revenium API keys should start with "hak_"');
+  const validPrefixes = ["hak_", "rev_"];
+  if (!validPrefixes.some((prefix) => config.reveniumApiKey.startsWith(prefix))) {
+    throw new Error(
+      'Invalid Revenium API key format. Revenium API keys should start with "hak_" or "rev_"',
+    );
   }
 
   if (!config.reveniumBaseUrl) {

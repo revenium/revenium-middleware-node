@@ -48,7 +48,8 @@ export interface ReveniumConfig {
   reveniumBaseUrl?: string;
   debug?: boolean;
   printSummary?: boolean | SummaryFormat;
-  teamId?: string;
+  reveniumTeamId?: string;
+  reveniumEnforcementBaseUrl?: string;
   capturePrompts?: boolean;
   maxPromptSize?: number;
   failSilent?: boolean;

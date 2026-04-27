@@ -17,6 +17,7 @@ import {
 } from "../_core/prompt/extraction.js";
 import { ProviderInfo, getProviderMetadata } from "./provider-detection.js";
 import { StreamingWrapper } from "./streaming.js";
+import { enforcePreCallRules } from "../_core/enforcement/evaluator.js";
 
 interface ResponsesAPIResult {
   id?: string;
@@ -249,6 +250,14 @@ export class CompletionsInterface {
   ): Promise<OpenAI.ChatCompletion> {
     const startTime = Date.now();
     const requestId = randomUUID();
+    const providerMeta = getProviderMetadata(this.providerInfo);
+
+    enforcePreCallRules({
+      subscriberId: metadata?.subscriber?.id,
+      productName: metadata?.productName,
+      model: params.model,
+      provider: providerMeta.provider,
+    });
 
     try {
       const response = await this.client.chat.completions.create(params);
@@ -299,6 +308,15 @@ export class CompletionsInterface {
     params: OpenAI.ChatCompletionCreateParamsStreaming,
     metadata?: UsageMetadata,
   ): Promise<StreamingWrapper> {
+    const providerMeta = getProviderMetadata(this.providerInfo);
+
+    enforcePreCallRules({
+      subscriberId: metadata?.subscriber?.id,
+      productName: metadata?.productName,
+      model: params.model,
+      provider: providerMeta.provider,
+    });
+
     const stream = await this.client.chat.completions.create({
       ...params,
       stream: true,
