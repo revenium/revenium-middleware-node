@@ -49,16 +49,6 @@ export async function buildPayload(params: PayloadParams): Promise<ReveniumPaylo
   const requestTime = new Date(params.startTime).toISOString();
   const metadataFields = buildMetadataFields(params.usageMetadata);
 
-  const environment = getEnvironment();
-  const region = await getRegion();
-  const credentialAlias = getCredentialAlias();
-  const traceType = getTraceType();
-  const traceName = getTraceName();
-  const parentTransactionId = getParentTransactionId();
-  const transactionName = getTransactionName();
-  const retryNumber = getRetryNumber();
-  const operationSubtype = detectOperationSubtype(params.request);
-
   const basePayload: ReveniumPayload = {
     transactionId: params.requestId || `${params.operationType.toLowerCase()}-${randomUUID()}`,
     operationType: params.operationType,
@@ -81,15 +71,15 @@ export async function buildPayload(params: PayloadParams): Promise<ReveniumPaylo
     isStreamed: params.isStreamed,
     timeToFirstToken: params.timeToFirstToken,
     ...metadataFields,
-    environment: environment || undefined,
-    region: region || undefined,
-    credentialAlias: credentialAlias || undefined,
-    traceType: traceType || undefined,
-    traceName: traceName || undefined,
-    parentTransactionId: parentTransactionId || undefined,
-    transactionName: transactionName || undefined,
-    retryNumber: retryNumber !== undefined ? retryNumber : undefined,
-    operationSubtype: operationSubtype || undefined,
+    environment: (metadataFields.environment as string) ?? getEnvironment() ?? undefined,
+    region: (metadataFields.region as string) ?? (await getRegion()) ?? undefined,
+    credentialAlias: (metadataFields.credentialAlias as string) ?? getCredentialAlias() ?? undefined,
+    traceType: (metadataFields.traceType as string) ?? getTraceType() ?? undefined,
+    traceName: (metadataFields.traceName as string) ?? getTraceName() ?? undefined,
+    parentTransactionId: (metadataFields.parentTransactionId as string) ?? getParentTransactionId() ?? undefined,
+    transactionName: (metadataFields.transactionName as string) ?? getTransactionName() ?? undefined,
+    retryNumber: (metadataFields.retryNumber as number) ?? getRetryNumber() ?? undefined,
+    operationSubtype: (metadataFields.operationSubtype as string) ?? detectOperationSubtype(params.request) ?? undefined,
     ...(params.attributes &&
       Object.keys(params.attributes).length > 0 && { attributes: params.attributes }),
     ...(params.promptData && {

@@ -1,3 +1,5 @@
+import type { UsageMetadata } from "../_core/types/index.js";
+
 export type MessageRole = "system" | "user" | "assistant" | "function" | "tool";
 
 export interface FunctionCall {
@@ -134,36 +136,13 @@ export interface RequestContext {
   metadata?: LiteLLMUsageMetadata;
 }
 
-export interface LiteLLMUsageMetadata {
-  traceId?: string;
+export interface LiteLLMUsageMetadata extends UsageMetadata {
   taskId?: string;
-  taskType?: string;
   subscriberEmail?: string;
   subscriberId?: string;
   subscriberCredentialName?: string;
   subscriberCredential?: string;
-  organizationName?: string;
-  organizationId?: string;
-  subscriptionId?: string;
-  productName?: string;
-  productId?: string;
-  agent?: string;
-  responseQualityScore?: number;
-  environment?: string;
-  operationSubtype?: string;
-  retryNumber?: number;
-  parentTransactionId?: string;
-  transactionName?: string;
-  region?: string;
-  credentialAlias?: string;
-  traceType?: string;
-  traceName?: string;
-  capturePrompts?: boolean;
   maxPromptSize?: number;
-  agenticJobId?: string;
-  agenticJobName?: string;
-  agenticJobType?: string;
-  agenticJobVersion?: string;
 }
 
 export interface LiteLLMConfig {

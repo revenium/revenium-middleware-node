@@ -1,38 +1,11 @@
-export interface GoogleUsageMetadata {
-  traceId?: string;
-  taskType?: string;
+import { UsageMetadata } from "../_core/types/index.js";
+
+export interface GoogleUsageMetadata extends UsageMetadata {
   subscriberEmail?: string;
   subscriberId?: string;
   subscriberCredentialName?: string;
   subscriberCredential?: string;
-  organizationName?: string;
-  /** @deprecated Use organizationName instead */
-  organizationId?: string;
-  subscriptionId?: string;
-  productName?: string;
-  /** @deprecated Use productName instead */
-  productId?: string;
-  agent?: string;
-  responseQualityScore?: number;
   modelSource?: string;
-  systemFingerprint?: string;
-  temperature?: number;
-  errorReason?: string;
-  mediationLatency?: number;
-  capturePrompts?: boolean;
-  environment?: string;
-  operationSubtype?: string;
-  retryNumber?: number;
-  parentTransactionId?: string;
-  transactionName?: string;
-  region?: string;
-  credentialAlias?: string;
-  traceType?: string;
-  traceName?: string;
-  agenticJobId?: string;
-  agenticJobName?: string;
-  agenticJobType?: string;
-  agenticJobVersion?: string;
 }
 
 export interface IGoogleResponse {
