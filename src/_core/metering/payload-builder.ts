@@ -73,13 +73,19 @@ export async function buildPayload(params: PayloadParams): Promise<ReveniumPaylo
     ...metadataFields,
     environment: (metadataFields.environment as string) ?? getEnvironment() ?? undefined,
     region: (metadataFields.region as string) ?? (await getRegion()) ?? undefined,
-    credentialAlias: (metadataFields.credentialAlias as string) ?? getCredentialAlias() ?? undefined,
+    credentialAlias:
+      (metadataFields.credentialAlias as string) ?? getCredentialAlias() ?? undefined,
     traceType: (metadataFields.traceType as string) ?? getTraceType() ?? undefined,
     traceName: (metadataFields.traceName as string) ?? getTraceName() ?? undefined,
-    parentTransactionId: (metadataFields.parentTransactionId as string) ?? getParentTransactionId() ?? undefined,
-    transactionName: (metadataFields.transactionName as string) ?? getTransactionName() ?? undefined,
+    parentTransactionId:
+      (metadataFields.parentTransactionId as string) ?? getParentTransactionId() ?? undefined,
+    transactionName:
+      (metadataFields.transactionName as string) ?? getTransactionName() ?? undefined,
     retryNumber: (metadataFields.retryNumber as number) ?? getRetryNumber() ?? undefined,
-    operationSubtype: (metadataFields.operationSubtype as string) ?? detectOperationSubtype(params.request) ?? undefined,
+    operationSubtype:
+      (metadataFields.operationSubtype as string) ??
+      detectOperationSubtype(params.request) ??
+      undefined,
     ...(params.attributes &&
       Object.keys(params.attributes).length > 0 && { attributes: params.attributes }),
     ...(params.promptData && {
