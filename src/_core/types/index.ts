@@ -27,6 +27,19 @@ export interface UsageMetadata {
   agenticJobName?: string;
   agenticJobType?: string;
   agenticJobVersion?: string;
+  retryNumber?: number;
+  environment?: string;
+  region?: string;
+  parentTransactionId?: string;
+  transactionName?: string;
+  traceType?: string;
+  traceName?: string;
+  operationSubtype?: string;
+  errorReason?: string;
+  credentialAlias?: string;
+  mediationLatency?: number;
+  systemFingerprint?: string;
+  temperature?: number;
 }
 
 export type OperationType =

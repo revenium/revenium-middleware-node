@@ -15,17 +15,7 @@ export interface FalConfig {
   maxRetries?: number;
 }
 
-export interface FalUsageMetadata extends UsageMetadata {
-  environment?: string;
-  operationSubtype?: string;
-  retryNumber?: number;
-  parentTransactionId?: string;
-  transactionName?: string;
-  region?: string;
-  credentialAlias?: string;
-  traceType?: string;
-  traceName?: string;
-}
+export type FalUsageMetadata = UsageMetadata;
 
 export interface FalTrackingData {
   endpointId: string;

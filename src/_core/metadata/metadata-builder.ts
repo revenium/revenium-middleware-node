@@ -29,6 +29,19 @@ const METADATA_FIELD_MAP: MetadataFieldConfig[] = [
   { source: "agenticJobName" },
   { source: "agenticJobType" },
   { source: "agenticJobVersion" },
+  { source: "retryNumber" },
+  { source: "environment" },
+  { source: "region" },
+  { source: "parentTransactionId" },
+  { source: "transactionName" },
+  { source: "traceType" },
+  { source: "traceName" },
+  { source: "operationSubtype" },
+  { source: "errorReason" },
+  { source: "credentialAlias" },
+  { source: "mediationLatency" },
+  { source: "systemFingerprint" },
+  { source: "temperature" },
 ];
 
 function getJobFieldsFromEnv(): Partial<
