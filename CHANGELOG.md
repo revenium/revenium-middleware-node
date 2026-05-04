@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-05-04
+
+### Added
+
+- 13 fields to shared `UsageMetadata` interface (`retryNumber`, `environment`, `region`, `parentTransactionId`, `transactionName`, `traceType`, `traceName`, `operationSubtype`, `errorReason`, `credentialAlias`, `mediationLatency`, `systemFingerprint`, `temperature`) for per-request configuration across all providers
+
+### Fixed
+
+- Precedence bug in `payload-builder.ts` where env vars overwrote user-provided values (now: user-set > env var > undefined)
+
+### Changed
+
+- De-duplicated `GoogleUsageMetadata`, `FalUsageMetadata`, `LiteLLMUsageMetadata` to extend shared `UsageMetadata` interface instead of redeclaring fields
+
 ## [1.1.3] - 2026-04-27
 
 ### Added
@@ -76,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.4]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.4
 [1.1.3]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.3
 [1.1.2]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.2
 [1.1.1]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.1
