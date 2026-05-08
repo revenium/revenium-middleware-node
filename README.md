@@ -390,6 +390,81 @@ Environment variables for distributed tracing and analytics:
 | `REVENIUM_TRANSACTION_NAME`      | Human-friendly operation label                                             |
 | `REVENIUM_RETRY_NUMBER`          | Retry attempt number (0 for first attempt)                                 |
 
+## Cost Controls / Enforcement
+
+Per-call enforcement blocks outgoing provider requests when a subscriber has a breached `BLOCK` cost control configured in Revenium. The OpenAI middleware gates both sync and streaming chat completions; other providers will adopt the same gate in follow-up work (unified exception + Anthropic wiring + Node/Python/Go env-var normalization). Enforcement currently covers chat completions only; embeddings, images, and audio are not gated.
+
+### Environment variables
+
+| Variable                        | Required             | Description                                                                                                       |
+| ------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `REVENIUM_METERING_API_KEY`     | Yes                  | Revenium API key (starts with `hak_` or `rev_`). The `_METERING_` infix is load-bearing.                          |
+| `REVENIUM_TEAM_ID`              | Yes for enforcement  | Hashed team ID. If unset, the engine starts dormant (warns once, skips cost control fetch) and all provider calls pass through. |
+| `REVENIUM_ENFORCEMENT_BASE_URL` | No                   | Base URL for the enforcement API. Falls back to `REVENIUM_METERING_BASE_URL` when unset.                          |
+
+### How it works
+
+`Initialize()` (from `@revenium/middleware/openai`) calls `startEnforcementPolling()`, which boots a background poller on `/v2/api/ai/enforcement-rules/{teamId}` every 30s with ±20% jitter. Fetched cost controls are cached in memory; a `204 No Content` response caches an empty set. The poll timer is `unref`'d so it never prevents process exit.
+
+Before every chat completion (sync and streaming), the middleware builds enforcement criteria from the request — `subscriberId` from `metadata.subscriber.id`, `model` from request params, `productName` from metadata, `provider` from the detected provider — and calls `enforcePreCallRules(criteria)`. The evaluator:
+
+- skips cost controls where `breached === false`;
+- logs a warning and continues past cost controls where `shadowMode === true` or `action ∈ {WARN_ONLY, THROTTLE}` — these are observation-only client-side; the server still enforces server-side throttling;
+- throws `CostLimitExceeded` on the first matching `BLOCK` cost control.
+
+The engine fails open: missing team ID, network outages, an unreachable Revenium API, or a parse error all leave the cache untouched and `enforcePreCallRules` becomes a no-op (the request passes). Enforcement errors never bubble to user code as metering failures.
+
+### Error shape
+
+```ts
+class CostLimitExceeded extends ReveniumError {
+  readonly ruleId: string;       // numeric server ruleId, stringified for JSON-safe logging
+  readonly threshold: number;    // cost control limit
+  readonly currentValue: number; // subscriber's metered value at block time
+  readonly periodType: string;   // DAILY / WEEKLY / MONTHLY / QUARTERLY
+  readonly context?: Record<string, unknown>; // subscriberId / productName / model / provider at call time
+}
+```
+
+`CostLimitExceeded` is exported from the package root:
+
+```ts
+import { CostLimitExceeded } from "@revenium/middleware";
+```
+
+### Usage
+
+```ts
+import { Initialize, GetClient } from "@revenium/middleware/openai";
+import { CostLimitExceeded } from "@revenium/middleware";
+
+Initialize(); // loads REVENIUM_METERING_API_KEY + REVENIUM_TEAM_ID from env, starts enforcement polling
+const client = GetClient();
+
+try {
+  const response = await client.chat().completions().create(
+    {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: "hello" }],
+    },
+    { subscriber: { id: "alice@example.com" } },
+  );
+  console.log(response.choices[0].message.content);
+} catch (err) {
+  if (err instanceof CostLimitExceeded) {
+    console.warn(
+      `blocked by cost control ${err.ruleId}: $${err.currentValue.toFixed(2)} of $${err.threshold.toFixed(2)} ${err.periodType} limit`,
+    );
+    return; // or degrade gracefully
+  }
+  throw err; // not an enforcement error — handle as usual
+}
+```
+
+### Shadow mode
+
+`shadowMode: true` on any cost control (including `action: BLOCK`) downgrades it to observation-only for the SDK — the cost control is logged at `warn` level via the configured logger but never throws. This matches the Go SDK semantics so a cost control can be safely rolled out in shadow mode before flipping to enforcement.
+
 ## Configuration Options
 
 ### Common Environment Variables

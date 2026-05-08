@@ -2,7 +2,7 @@ import { ReveniumPayload } from "../types/index.js";
 import { getConfig, getLogger } from "../config/manager.js";
 import { buildReveniumUrl } from "./url-builder.js";
 import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS } from "../constants.js";
-import { executeWithCircuitBreaker } from "../resilience/circuit-breaker.js";
+import { executeWithMeteringCircuitBreaker } from "../resilience/circuit-breaker.js";
 
 export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
   const config = getConfig();
@@ -32,7 +32,7 @@ export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
     totalTokens: payload.totalTokenCount,
   });
 
-  await executeWithCircuitBreaker(async () => {
+  await executeWithMeteringCircuitBreaker(async () => {
     const response = await fetch(url, {
       method: "POST",
       headers: {

@@ -1,6 +1,6 @@
 import { getConfig, getLogger } from "../config/manager.js";
 import { DEFAULT_REVENIUM_BASE_URL, DEFAULT_CONFIG, ENFORCEMENT_CONFIG } from "../constants.js";
-import { executeWithCircuitBreaker } from "../resilience/circuit-breaker.js";
+import { executeWithEnforcementCircuitBreaker } from "../resilience/circuit-breaker.js";
 import { EnforcementRule, setRules, clearCache } from "./cache.js";
 
 let pollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -160,7 +160,7 @@ async function fetchRules(): Promise<void> {
   const timeout = setTimeout(() => controller.abort(), DEFAULT_CONFIG.API_TIMEOUT);
 
   try {
-    await executeWithCircuitBreaker(async () => {
+    await executeWithEnforcementCircuitBreaker(async () => {
       const response = await fetch(url, {
         method: "GET",
         headers: {
