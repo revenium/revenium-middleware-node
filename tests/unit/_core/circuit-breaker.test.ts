@@ -3,7 +3,12 @@ import {
   CircuitState,
   CircuitBreakerConfig,
   FailureStrategy,
-  resetCircuitBreaker,
+  getMeteringCircuitBreaker,
+  getEnforcementCircuitBreaker,
+  executeWithMeteringCircuitBreaker,
+  executeWithEnforcementCircuitBreaker,
+  resetMeteringCircuitBreaker,
+  resetEnforcementCircuitBreaker,
 } from "../../../src/_core/resilience/circuit-breaker";
 
 const testConfig: CircuitBreakerConfig = {
@@ -15,7 +20,8 @@ const testConfig: CircuitBreakerConfig = {
 
 beforeEach(() => {
   jest.useFakeTimers();
-  resetCircuitBreaker();
+  resetMeteringCircuitBreaker();
+  resetEnforcementCircuitBreaker();
 });
 
 afterEach(() => {
@@ -144,5 +150,56 @@ describe("CircuitBreaker", () => {
       await cb.execute(() => Promise.reject(new Error("retryable"))).catch(() => {});
     }
     expect(cb.getState()).toBe(CircuitState.OPEN);
+  });
+});
+
+describe("named circuit breakers (metering / enforcement)", () => {
+  it("getMeteringCircuitBreaker and getEnforcementCircuitBreaker return distinct instances", () => {
+    const metering = getMeteringCircuitBreaker();
+    const enforcement = getEnforcementCircuitBreaker();
+    expect(metering).not.toBe(enforcement);
+  });
+
+  it("each named breaker is a stable singleton across calls", () => {
+    expect(getMeteringCircuitBreaker()).toBe(getMeteringCircuitBreaker());
+    expect(getEnforcementCircuitBreaker()).toBe(getEnforcementCircuitBreaker());
+  });
+
+  it("metering breaker trips OPEN without affecting enforcement breaker", async () => {
+    const meteringFailures = 12;
+    for (let i = 0; i < meteringFailures; i++) {
+      await executeWithMeteringCircuitBreaker(() =>
+        Promise.reject(new Error("metering 503")),
+      ).catch(() => {});
+    }
+    expect(getMeteringCircuitBreaker().getState()).toBe(CircuitState.OPEN);
+    expect(getEnforcementCircuitBreaker().getState()).toBe(CircuitState.CLOSED);
+  });
+
+  it("enforcement breaker trips OPEN without affecting metering breaker", async () => {
+    const enforcementFailures = 12;
+    for (let i = 0; i < enforcementFailures; i++) {
+      await executeWithEnforcementCircuitBreaker(() =>
+        Promise.reject(new Error("enforcement 503")),
+      ).catch(() => {});
+    }
+    expect(getEnforcementCircuitBreaker().getState()).toBe(CircuitState.OPEN);
+    expect(getMeteringCircuitBreaker().getState()).toBe(CircuitState.CLOSED);
+  });
+
+  it("resetMeteringCircuitBreaker leaves enforcement breaker untouched", async () => {
+    for (let i = 0; i < 12; i++) {
+      await executeWithMeteringCircuitBreaker(() => Promise.reject(new Error("m"))).catch(() => {});
+      await executeWithEnforcementCircuitBreaker(() => Promise.reject(new Error("e"))).catch(
+        () => {},
+      );
+    }
+    expect(getMeteringCircuitBreaker().getState()).toBe(CircuitState.OPEN);
+    expect(getEnforcementCircuitBreaker().getState()).toBe(CircuitState.OPEN);
+
+    resetMeteringCircuitBreaker();
+
+    expect(getMeteringCircuitBreaker().getState()).toBe(CircuitState.CLOSED);
+    expect(getEnforcementCircuitBreaker().getState()).toBe(CircuitState.OPEN);
   });
 });

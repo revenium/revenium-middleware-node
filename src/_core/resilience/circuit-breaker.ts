@@ -176,26 +176,49 @@ export class CircuitBreaker {
   }
 }
 
-let globalCircuitBreaker: CircuitBreaker | null = null;
+let meteringCircuitBreaker: CircuitBreaker | null = null;
+let enforcementCircuitBreaker: CircuitBreaker | null = null;
 
-export function getCircuitBreaker(
+export function getMeteringCircuitBreaker(
   config?: Partial<CircuitBreakerConfig>,
   strategy?: FailureStrategy,
 ): CircuitBreaker {
-  if (!globalCircuitBreaker) {
+  if (!meteringCircuitBreaker) {
     const finalConfig = config ? { ...DEFAULT_CIRCUIT_CONFIG, ...config } : DEFAULT_CIRCUIT_CONFIG;
-    globalCircuitBreaker = new CircuitBreaker(finalConfig, strategy);
+    meteringCircuitBreaker = new CircuitBreaker(finalConfig, strategy);
   }
-  return globalCircuitBreaker;
+  return meteringCircuitBreaker;
 }
 
-export function resetCircuitBreaker(): void {
-  if (globalCircuitBreaker) {
-    globalCircuitBreaker.reset();
+export function getEnforcementCircuitBreaker(
+  config?: Partial<CircuitBreakerConfig>,
+  strategy?: FailureStrategy,
+): CircuitBreaker {
+  if (!enforcementCircuitBreaker) {
+    const finalConfig = config ? { ...DEFAULT_CIRCUIT_CONFIG, ...config } : DEFAULT_CIRCUIT_CONFIG;
+    enforcementCircuitBreaker = new CircuitBreaker(finalConfig, strategy);
   }
-  globalCircuitBreaker = null;
+  return enforcementCircuitBreaker;
 }
 
-export function executeWithCircuitBreaker<T>(fn: () => Promise<T>): Promise<T> {
-  return getCircuitBreaker().execute(fn);
+export function resetMeteringCircuitBreaker(): void {
+  if (meteringCircuitBreaker) {
+    meteringCircuitBreaker.reset();
+  }
+  meteringCircuitBreaker = null;
+}
+
+export function resetEnforcementCircuitBreaker(): void {
+  if (enforcementCircuitBreaker) {
+    enforcementCircuitBreaker.reset();
+  }
+  enforcementCircuitBreaker = null;
+}
+
+export function executeWithMeteringCircuitBreaker<T>(fn: () => Promise<T>): Promise<T> {
+  return getMeteringCircuitBreaker().execute(fn);
+}
+
+export function executeWithEnforcementCircuitBreaker<T>(fn: () => Promise<T>): Promise<T> {
+  return getEnforcementCircuitBreaker().execute(fn);
 }

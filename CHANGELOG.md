@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-05-08
+
+### Fixed
+
+- Circuit breaker isolation: metering and enforcement now use independent breaker instances, preventing enforcement failures from tripping the metering circuit and vice versa
+
+### Changed
+
+- README: added Cost Controls / Enforcement section with configuration and usage documentation
+
 ## [1.1.4] - 2026-05-04
 
 ### Added
@@ -90,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.5]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.5
 [1.1.4]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.4
 [1.1.3]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.3
 [1.1.2]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.2
