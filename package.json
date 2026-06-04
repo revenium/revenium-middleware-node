@@ -1,6 +1,6 @@
 {
   "name": "@revenium/middleware",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Unified Revenium middleware for AI provider usage tracking - OpenAI, Anthropic, Google, Perplexity, LiteLLM, fal.ai",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -95,6 +95,16 @@
         "types": "./dist/types/_core/tool-metering/index.d.ts",
         "default": "./dist/cjs/_core/tool-metering/index.js"
       }
+    },
+    "./webhooks": {
+      "import": {
+        "types": "./dist/types/webhooks/index.d.ts",
+        "default": "./dist/esm/webhooks/index.js"
+      },
+      "require": {
+        "types": "./dist/types/webhooks/index.d.ts",
+        "default": "./dist/cjs/webhooks/index.js"
+      }
     }
   },
   "typesVersions": {
@@ -122,6 +132,9 @@
       ],
       "tools": [
         "dist/types/_core/tool-metering/index.d.ts"
+      ],
+      "webhooks": [
+        "dist/types/webhooks/index.d.ts"
       ]
     }
   },

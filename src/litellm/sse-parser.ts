@@ -16,6 +16,7 @@ export class StreamingResponseParser {
   private promptTokens: number = 0;
   private completionTokens: number = 0;
   private totalTokens: number = 0;
+  private cachedTokens?: number;
   private finishReason: string | null = null;
   private responseFormat?: any;
   private requestBody?: LiteLLMChatCompletionRequest;
@@ -141,6 +142,9 @@ export class StreamingResponseParser {
       this.promptTokens = chunk.usage.prompt_tokens || 0;
       this.completionTokens = chunk.usage.completion_tokens || 0;
       this.totalTokens = chunk.usage.total_tokens || 0;
+      if (chunk.usage.prompt_tokens_details?.cached_tokens !== undefined) {
+        this.cachedTokens = chunk.usage.prompt_tokens_details.cached_tokens;
+      }
     }
 
     if (chunk.choices?.[0]?.finish_reason) this.finishReason = chunk.choices[0].finish_reason;
@@ -189,6 +193,8 @@ export class StreamingResponseParser {
           prompt_tokens: this.promptTokens,
           completion_tokens: this.completionTokens,
           total_tokens: this.totalTokens,
+          prompt_tokens_details:
+            this.cachedTokens === undefined ? undefined : { cached_tokens: this.cachedTokens },
         },
       };
     }
@@ -199,6 +205,7 @@ export class StreamingResponseParser {
       promptTokens: this.promptTokens,
       completionTokens: this.completionTokens,
       totalTokens: this.totalTokens,
+      cachedTokens: this.cachedTokens,
       duration: this.requestDuration,
       finishReason: this.finishReason || "stop",
       usageMetadata: this.requestContext.metadata,

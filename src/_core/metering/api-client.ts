@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { ReveniumPayload } from "../types/index.js";
 import { getConfig, getLogger } from "../config/manager.js";
 import { buildReveniumUrl } from "./url-builder.js";
@@ -24,6 +25,8 @@ export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
 
   const url = buildReveniumUrl(config.reveniumBaseUrl || DEFAULT_REVENIUM_BASE_URL, endpoint);
 
+  const { idempotencyKey, ...body } = payload;
+
   logger.debug("Sending Revenium API request", {
     url,
     operationType: payload.operationType,
@@ -39,8 +42,9 @@ export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
         "Content-Type": "application/json",
         Accept: "application/json",
         "x-api-key": config.reveniumApiKey,
+        "Idempotency-Key": idempotencyKey ?? randomUUID(),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
 
     logger.debug("Revenium API response", {

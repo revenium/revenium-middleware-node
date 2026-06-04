@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { ToolEventPayload } from "../types/tool-metering.js";
 import { getConfig, getLogger } from "../config/manager.js";
 import { buildReveniumUrl } from "../metering/url-builder.js";
@@ -17,6 +18,8 @@ export async function sendToolEvent(payload: ToolEventPayload): Promise<void> {
     API_ENDPOINTS.TOOL_EVENTS,
   );
 
+  const { idempotencyKey, ...body } = payload;
+
   logger.debug("Sending tool event to Revenium", {
     url,
     toolId: payload.toolId,
@@ -32,8 +35,9 @@ export async function sendToolEvent(payload: ToolEventPayload): Promise<void> {
       "Content-Type": "application/json",
       Accept: "application/json",
       "x-api-key": config.reveniumApiKey,
+      "Idempotency-Key": idempotencyKey ?? randomUUID(),
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
     signal: controller.signal,
   }).finally(() => clearTimeout(timeoutId));
 

@@ -113,8 +113,8 @@ export async function sendReveniumMetrics(data: {
     inputTokenCount: data.promptTokens,
     outputTokenCount: isEmbedding ? 0 : data.completionTokens,
     reasoningTokenCount: data.reasoningTokens || 0,
-    cacheCreationTokenCount: data.cachedTokens || 0,
-    cacheReadTokenCount: 0,
+    cacheCreationTokenCount: 0,
+    cacheReadTokenCount: data.cachedTokens || 0,
     totalTokenCount: data.totalTokens,
     model: extractModelName(data.model),
     modelSource: extractModelSource(data.model),
@@ -214,10 +214,8 @@ export function extractMetadataFromHeaders(headers: Record<string, string>): Lit
   return {
     subscriberId: headers["x-revenium-subscriber-id"],
     productName: headers["x-revenium-product-name"] || headers["x-revenium-product-id"],
-    productId: headers["x-revenium-product-id"],
     organizationName:
       headers["x-revenium-organization-name"] || headers["x-revenium-organization-id"],
-    organizationId: headers["x-revenium-organization-id"],
     traceId: headers["x-revenium-trace-id"],
     taskType: headers["x-revenium-task-type"],
     agent: headers["x-revenium-agent"],
@@ -246,6 +244,7 @@ export function extractUsageFromResponse(response: LiteLLMChatCompletionResponse
   promptTokens: number;
   completionTokens: number;
   totalTokens: number;
+  cachedTokens?: number;
   finishReason: string | null;
 } {
   const usage = response.usage;
@@ -253,6 +252,7 @@ export function extractUsageFromResponse(response: LiteLLMChatCompletionResponse
     promptTokens: usage?.prompt_tokens || 0,
     completionTokens: usage?.completion_tokens || 0,
     totalTokens: usage?.total_tokens || 0,
+    cachedTokens: usage?.prompt_tokens_details?.cached_tokens,
     finishReason: response.choices?.[0]?.finish_reason || null,
   };
 }
