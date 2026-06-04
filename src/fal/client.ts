@@ -20,8 +20,7 @@ export class ReveniumFal {
   private mergeConfigDefaults(metadata?: FalUsageMetadata): FalUsageMetadata | undefined {
     if (!this.falConfig.organizationName && !this.falConfig.organizationId) return metadata;
     return {
-      organizationName: this.falConfig.organizationName,
-      organizationId: this.falConfig.organizationId,
+      organizationName: this.falConfig.organizationName || this.falConfig.organizationId,
       ...metadata,
     };
   }

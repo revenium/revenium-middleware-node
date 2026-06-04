@@ -42,6 +42,7 @@ const METADATA_FIELD_MAP: MetadataFieldConfig[] = [
   { source: "mediationLatency" },
   { source: "systemFingerprint" },
   { source: "temperature" },
+  { source: "idempotencyKey" },
 ];
 
 function getJobFieldsFromEnv(): Partial<

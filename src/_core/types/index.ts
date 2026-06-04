@@ -40,6 +40,7 @@ export interface UsageMetadata {
   mediationLatency?: number;
   systemFingerprint?: string;
   temperature?: number;
+  idempotencyKey?: string;
 }
 
 export type OperationType =
@@ -134,6 +135,7 @@ export interface ReveniumPayload {
   agenticJobName?: string;
   agenticJobType?: string;
   agenticJobVersion?: string;
+  idempotencyKey?: string;
   systemPrompt?: string;
   inputMessages?: string;
   outputResponse?: string;

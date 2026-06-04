@@ -5,6 +5,7 @@ export interface FalConfig {
   reveniumApiKey: string;
   reveniumBaseUrl?: string;
   organizationName?: string;
+  /** @deprecated Use organizationName instead. Wire-emit uses organizationName only. */
   organizationId?: string;
   debug?: boolean;
   printSummary?: boolean | "human" | "json";

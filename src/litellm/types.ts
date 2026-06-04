@@ -151,6 +151,7 @@ export interface LiteLLMConfig {
   litellmProxyUrl: string;
   litellmApiKey?: string;
   organizationName?: string;
+  /** @deprecated Use organizationName instead. Wire-emit uses organizationName only. */
   organizationId?: string;
   apiTimeout?: number;
   failSilent?: boolean;

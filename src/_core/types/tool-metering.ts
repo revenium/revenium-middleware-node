@@ -15,6 +15,7 @@ export interface ToolMetadata extends ToolContext {
 }
 
 export interface ToolEventPayload {
+  idempotencyKey?: string;
   transactionId: string;
   toolId: string;
   operation?: string;
