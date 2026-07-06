@@ -34,6 +34,12 @@ describe("buildMetadataFields", () => {
     expect(result.mediationLatency).toBe(150);
     expect(result.systemFingerprint).toBe("fp_abc123");
     expect(result.temperature).toBe(0.7);
+    expect(result.idempotencyKey).toBeUndefined();
+  });
+
+  it("passes through idempotencyKey from usageMetadata", () => {
+    const result = buildMetadataFields({ idempotencyKey: "custom-key-123" });
+    expect(result.idempotencyKey).toBe("custom-key-123");
   });
 
   it("preserves retryNumber: 0 as a valid value", () => {

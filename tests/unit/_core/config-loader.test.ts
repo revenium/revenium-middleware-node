@@ -70,9 +70,9 @@ describe("loadConfigFromEnv", () => {
 
   it("reads reveniumEnforcementBaseUrl from REVENIUM_ENFORCEMENT_BASE_URL", () => {
     process.env[ENV_VARS.REVENIUM_API_KEY] = "hak_tenant_abc";
-    process.env[ENV_VARS.ENFORCEMENT_BASE_URL] = "https://enforce.api";
+    process.env[ENV_VARS.ENFORCEMENT_BASE_URL] = "http://localhost:8080/profitstream";
     const config = loadConfigFromEnv();
-    expect(config!.reveniumEnforcementBaseUrl).toBe("https://enforce.api");
+    expect(config!.reveniumEnforcementBaseUrl).toBe("http://localhost:8080/profitstream");
   });
 
   it("parses capturePrompts", () => {
