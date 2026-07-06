@@ -3,12 +3,12 @@ import "./anthropic-augmentation.js";
 import { initializeConfig, getConfig, getLogger, setConfig } from "../_core/config/manager.js";
 import { Config } from "../_core/types/index.js";
 import { patchAnthropic, unpatchAnthropic, isAnthropicPatched } from "./wrapper.js";
-import {
-  trackUsageAsync,
-  getCircuitBreakerStats,
-  resetAnthropicCircuitBreaker,
-} from "./middleware.js";
+import { trackUsageAsync } from "./middleware.js";
 import type { AnthropicTrackingData } from "./middleware.js";
+import {
+  getMeteringCircuitBreaker,
+  resetMeteringCircuitBreaker,
+} from "../_core/resilience/circuit-breaker.js";
 
 export type { ReveniumConfig, UsageMetadata, Logger, Config } from "../_core/types/index.js";
 
@@ -21,14 +21,7 @@ export type {
 
 export { patchAnthropic, unpatchAnthropic, isAnthropicPatched } from "./wrapper.js";
 
-export {
-  trackUsageAsync,
-  extractUsageFromResponse,
-  extractUsageFromStream,
-  getCircuitBreakerStats,
-  resetAnthropicCircuitBreaker,
-  canExecuteRequest,
-} from "./middleware.js";
+export { trackUsageAsync, extractUsageFromResponse, extractUsageFromStream } from "./middleware.js";
 
 export type { AnthropicTrackingData } from "./middleware.js";
 
@@ -77,7 +70,7 @@ export function getStatus(): {
   hasConfig: boolean;
   circuitBreakerState?: string;
 } {
-  const stats = getCircuitBreakerStats();
+  const stats = getMeteringCircuitBreaker().getStats();
   return {
     initialized: isInitialized(),
     patched: isAnthropicPatched(),
@@ -94,7 +87,7 @@ export function reset(): void {
   const logger = getLogger();
   try {
     unpatchAnthropic();
-    resetAnthropicCircuitBreaker();
+    resetMeteringCircuitBreaker();
     logger.debug("Middleware reset completed");
   } catch (error) {
     logger.error("Error during middleware reset", {

@@ -1,5 +1,7 @@
 export {
   reportJobOutcome,
+  amendJobOutcome,
+  getJobOutcomeHistory,
   listJobs,
   getJob,
   getJobTypes,
@@ -15,8 +17,15 @@ export {
   runWithJobContext,
 } from "./job-context.js";
 export type { JobContextData, JobContextOptions } from "./job-context.js";
+export {
+  OutcomeAlreadyReportedError,
+  OutcomeNotReportedError,
+  OutcomeAmendConflictError,
+} from "../types/jobs.js";
 export type {
   JobOutcome,
+  JobOutcomeAmendment,
+  JobOutcomeRevisionEntry,
   JobResource,
   ExecutionStatus,
   OutcomeType,

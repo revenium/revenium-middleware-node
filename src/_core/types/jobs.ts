@@ -28,6 +28,57 @@ export interface JobResource {
   outcomeReportedAt?: string;
   outcomeMetadata?: string;
   hasOutcome: boolean;
+  outcomeUpdateCount?: number;
+  outcomeUpdatedAt?: string | null;
+  outcomeUpdatedBy?: string | null;
+}
+
+export interface JobOutcomeAmendment extends Partial<JobOutcome> {
+  reason: string;
+}
+
+export interface JobOutcomeRevisionEntry {
+  sequence: number;
+  executionStatus: string;
+  outcomeType: string | null;
+  outcomeValue: number | null;
+  outcomeCurrency: string | null;
+  outcomeMetadata: string | null;
+  reportedBy: string | null;
+  reportedAt: string;
+  reason: string | null;
+}
+
+export class OutcomeAlreadyReportedError extends Error {
+  constructor(
+    public readonly jobId: string,
+    public readonly reportedAt: string | null,
+    public readonly updateCount: number | null,
+    message?: string,
+  ) {
+    super(message ?? `Outcome already reported for job ${jobId}; use amendJobOutcome to update`);
+    this.name = "OutcomeAlreadyReportedError";
+  }
+}
+
+export class OutcomeNotReportedError extends Error {
+  constructor(
+    public readonly jobId: string,
+    message?: string,
+  ) {
+    super(message ?? `No outcome reported yet for job ${jobId}; report an outcome before amending`);
+    this.name = "OutcomeNotReportedError";
+  }
+}
+
+export class OutcomeAmendConflictError extends Error {
+  constructor(
+    public readonly jobId: string,
+    message?: string,
+  ) {
+    super(message ?? `Concurrent outcome update detected for job ${jobId}; refetch and retry`);
+    this.name = "OutcomeAmendConflictError";
+  }
 }
 
 export interface JobROIResource {

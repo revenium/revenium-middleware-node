@@ -465,6 +465,78 @@ try {
 
 `shadowMode: true` on any cost control (including `action: BLOCK`) downgrades it to observation-only for the SDK — the cost control is logged at `warn` level via the configured logger but never throws. This matches the Go SDK semantics so a cost control can be safely rolled out in shadow mode before flipping to enforcement.
 
+## Jobs API
+
+### Reporting an Outcome
+
+```typescript
+import { reportJobOutcome, OutcomeAlreadyReportedError } from '@revenium/middleware';
+
+try {
+  const job = await reportJobOutcome('loan-app-123', {
+    executionStatus: 'SUCCESS',
+    outcomeType: 'CONVERTED',
+    outcomeValue: 150.00,
+    outcomeCurrency: 'USD',
+  });
+} catch (err) {
+  if (err instanceof OutcomeAlreadyReportedError) {
+    console.log(`Already reported at ${err.reportedAt}, updates: ${err.updateCount}`);
+  }
+}
+```
+
+### Amending an Outcome
+
+```typescript
+import {
+  amendJobOutcome,
+  OutcomeNotReportedError,
+  OutcomeAmendConflictError,
+} from '@revenium/middleware';
+
+try {
+  const updated = await amendJobOutcome('loan-app-123', {
+    reason: 'Customer churned 30 days after initial conversion',
+    executionStatus: 'FAILED',
+  });
+  console.log(`Update count: ${updated.outcomeUpdateCount}`);
+} catch (err) {
+  if (err instanceof OutcomeNotReportedError) {
+    console.log('No outcome to amend yet');
+  } else if (err instanceof OutcomeAmendConflictError) {
+    console.log('Concurrent update detected, refetch and retry');
+  }
+}
+```
+
+### Outcome History
+
+```typescript
+import { getJobOutcomeHistory } from '@revenium/middleware';
+
+const history = await getJobOutcomeHistory('loan-app-123');
+for (const entry of history) {
+  console.log(`#${entry.sequence}: ${entry.executionStatus} (${entry.reason ?? 'initial report'})`);
+}
+```
+
+### Using JobContext
+
+```typescript
+import { JobContext } from '@revenium/middleware';
+
+const ctx = new JobContext({ jobId: 'loan-app-123', teamId: 'team-1' });
+const result = await ctx.run(async () => {
+  // AI calls within this scope are automatically tagged with the job
+  return await processLoanApplication();
+});
+
+// Report or amend outcomes through the context
+await ctx.reportOutcome({ executionStatus: 'SUCCESS', outcomeType: 'CONVERTED', outcomeValue: 150 });
+await ctx.amendOutcome({ reason: 'Value correction', outcomeValue: 175 });
+```
+
 ## Configuration Options
 
 ### Common Environment Variables

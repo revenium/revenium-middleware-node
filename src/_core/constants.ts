@@ -14,7 +14,10 @@ export const RETRY_CONFIG = {
   BASE_DELAY: 1000,
   MAX_DELAY: 5000,
   JITTER_FACTOR: 0.1,
+  MAX_RETRY_AFTER_SECONDS: 60,
 } as const;
+
+export const RETRYABLE_STATUSES = new Set([408, 429, 500, 502, 503, 504]);
 
 export const DEFAULT_CONFIG = {
   API_TIMEOUT: 5000,

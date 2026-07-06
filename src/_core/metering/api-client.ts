@@ -2,8 +2,9 @@ import { randomUUID } from "crypto";
 import { ReveniumPayload } from "../types/index.js";
 import { getConfig, getLogger } from "../config/manager.js";
 import { buildReveniumUrl } from "./url-builder.js";
-import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS } from "../constants.js";
+import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS, DEFAULT_CONFIG } from "../constants.js";
 import { executeWithMeteringCircuitBreaker } from "../resilience/circuit-breaker.js";
+import { withRetry, HttpError, parseRetryAfter } from "../resilience/retry.js";
 
 export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
   const config = getConfig();
@@ -26,6 +27,8 @@ export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
   const url = buildReveniumUrl(config.reveniumBaseUrl || DEFAULT_REVENIUM_BASE_URL, endpoint);
 
   const { idempotencyKey, ...body } = payload;
+  const resolvedIdempotencyKey = idempotencyKey ?? randomUUID();
+  const maxRetries = config.maxRetries ?? DEFAULT_CONFIG.MAX_RETRIES;
 
   logger.debug("Sending Revenium API request", {
     url,
@@ -36,40 +39,44 @@ export async function sendToRevenium(payload: ReveniumPayload): Promise<void> {
   });
 
   await executeWithMeteringCircuitBreaker(async () => {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "x-api-key": config.reveniumApiKey,
-        "Idempotency-Key": idempotencyKey ?? randomUUID(),
-      },
-      body: JSON.stringify(body),
-    });
+    await withRetry(async () => {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "x-api-key": config.reveniumApiKey,
+          "Idempotency-Key": resolvedIdempotencyKey,
+        },
+        body: JSON.stringify(body),
+      });
 
-    logger.debug("Revenium API response", {
-      status: response.status,
-      statusText: response.statusText,
-      transactionId: payload.transactionId,
-      operationType: payload.operationType,
-    });
-
-    if (!response.ok) {
-      const responseText = await response.text();
-      logger.error("Revenium API error response", {
+      logger.debug("Revenium API response", {
         status: response.status,
         statusText: response.statusText,
-        body: responseText,
         transactionId: payload.transactionId,
+        operationType: payload.operationType,
       });
-      throw new Error(
-        `Revenium API error: ${response.status} ${response.statusText} - ${responseText}`,
-      );
-    }
 
-    logger.debug("Revenium tracking successful", {
-      transactionId: payload.transactionId,
-      operationType: payload.operationType,
-    });
+      if (!response.ok) {
+        const responseText = await response.text();
+        logger.error("Revenium API error response", {
+          status: response.status,
+          statusText: response.statusText,
+          body: responseText,
+          transactionId: payload.transactionId,
+        });
+        throw new HttpError(
+          `Revenium API error: ${response.status} ${response.statusText} - ${responseText}`,
+          response.status,
+          parseRetryAfter(response.headers.get("Retry-After")),
+        );
+      }
+
+      logger.debug("Revenium tracking successful", {
+        transactionId: payload.transactionId,
+        operationType: payload.operationType,
+      });
+    }, maxRetries);
   });
 }
