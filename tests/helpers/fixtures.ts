@@ -33,7 +33,11 @@ export function createPayload(overrides: Partial<ReveniumPayload> = {}): Reveniu
   };
 }
 
-export function createMockFetch(response: Partial<Response> = {}): jest.Mock {
+export function createMockFetch(
+  response: Partial<Response> & { headers?: Record<string, string> } = {},
+): jest.Mock {
+  const { headers: headerOverrides, ...rest } = response;
+  const headerMap = new Map(Object.entries(headerOverrides ?? {}));
   return jest.fn(() =>
     Promise.resolve({
       ok: true,
@@ -41,7 +45,8 @@ export function createMockFetch(response: Partial<Response> = {}): jest.Mock {
       statusText: "OK",
       json: () => Promise.resolve({}),
       text: () => Promise.resolve(""),
-      ...response,
+      headers: { get: (name: string) => headerMap.get(name) ?? null },
+      ...rest,
     } as unknown as Response),
   );
 }

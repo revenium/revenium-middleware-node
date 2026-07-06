@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - Unreleased
+
+### Added
+
+- `amendJobOutcome(jobId, amendment, teamId?)` for updating previously reported outcomes via PATCH
+- `getJobOutcomeHistory(jobId, teamId?)` for retrieving ordered outcome revision history
+- `JobContext.amendOutcome(amendment)` convenience method
+- Typed error classes: `OutcomeAlreadyReportedError`, `OutcomeNotReportedError`, `OutcomeAmendConflictError`
+- `JobOutcomeAmendment` and `JobOutcomeRevisionEntry` interfaces
+- `outcomeUpdateCount`, `outcomeUpdatedAt`, `outcomeUpdatedBy` fields on `JobResource`
+
+### Changed
+
+- **Breaking:** `reportJobOutcome` now throws `OutcomeAlreadyReportedError` on 409 when the backend returns a structured conflict body (with `details.guidance`). Consumers relying on the silent-return behavior must add a try/catch. The fallback for legacy backends without the structured body is preserved.
+
+## [1.1.7] - 2026-07-06
+
+### Added
+
+- Retry with exponential backoff + jitter for all metering POSTs (completions, tool events, job outcomes)
+- HTTP status classification: retry `{408, 429, 500, 502, 503, 504}`, fail fast on other 4xx
+- `Retry-After` header support (delta-seconds and HTTP-date, clamped at 60s)
+- Stable `Idempotency-Key` across retry attempts for server-side deduplication
+- `HttpError` class with status code and Retry-After metadata
+- Circuit breaker protection for tool event metering
+
+### Changed
+
+- Centralized retry logic in metering API client; removed Anthropic-specific retry and circuit breaker
+- `config.maxRetries` is now honored by the centralized retry layer
+
 ## [1.1.6] - 2026-06-04
 
 ### Added
@@ -112,6 +143,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.7]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.7
 [1.1.6]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.6
 [1.1.5]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.5
 [1.1.4]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.4

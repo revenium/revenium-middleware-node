@@ -39,6 +39,8 @@ export { mapStopReason } from "./_core/stop-reason-mapper.js";
 
 export type {
   JobOutcome,
+  JobOutcomeAmendment,
+  JobOutcomeRevisionEntry,
   JobResource,
   ExecutionStatus,
   OutcomeType,
@@ -52,7 +54,14 @@ export type {
   PagedResponse,
 } from "./_core/types/jobs.js";
 export {
+  OutcomeAlreadyReportedError,
+  OutcomeNotReportedError,
+  OutcomeAmendConflictError,
+} from "./_core/types/jobs.js";
+export {
   reportJobOutcome,
+  amendJobOutcome,
+  getJobOutcomeHistory,
   listJobs,
   getJob,
   getJobTypes,

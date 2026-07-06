@@ -1,7 +1,16 @@
+import { randomUUID } from "crypto";
 import { getConfig, getLogger } from "../config/manager.js";
 import { DEFAULT_REVENIUM_BASE_URL, API_ENDPOINTS, ENV_VARS } from "../constants.js";
+import { withRetry, HttpError, parseRetryAfter } from "../resilience/retry.js";
+import {
+  OutcomeAlreadyReportedError,
+  OutcomeNotReportedError,
+  OutcomeAmendConflictError,
+} from "../types/jobs.js";
 import type {
   JobOutcome,
+  JobOutcomeAmendment,
+  JobOutcomeRevisionEntry,
   JobResource,
   JobROIResource,
   JobTimelineResource,
@@ -65,32 +74,61 @@ export async function reportJobOutcome(
 ): Promise<JobResource> {
   const logger = getLogger();
   const { url, headers } = buildJobRequest(`/${encodeURIComponent(jobId)}/outcome`, teamId);
+  const idempotencyKey = randomUUID();
 
   logger.debug("Reporting job outcome", { jobId, url });
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { ...headers, "Content-Type": "application/json" },
-    body: JSON.stringify(outcome),
-  });
+  return withRetry(async () => {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(outcome),
+    });
 
-  if (response.status === 409) {
-    logger.warn(`Job outcome already reported for job ${jobId}`);
-    try {
-      return (await response.json()) as JobResource;
-    } catch {
-      return {
-        id: "",
-        label: "",
-        resourceType: "JOB",
-        agenticJobId: jobId,
-        source: "SDK",
-        hasOutcome: true,
-      } as JobResource;
+    if (response.status === 409) {
+      logger.warn(`Job outcome already reported for job ${jobId}`);
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch {
+        return {
+          id: "",
+          label: "",
+          resourceType: "JOB",
+          agenticJobId: jobId,
+          source: "SDK",
+          hasOutcome: true,
+        } as JobResource;
+      }
+      const details =
+        body != null && typeof body === "object" && "details" in body
+          ? (body as { details: Record<string, string> }).details
+          : undefined;
+      if (details?.guidance) {
+        throw new OutcomeAlreadyReportedError(
+          jobId,
+          details.reportedAt ?? null,
+          details.updateCount != null ? Number(details.updateCount) : null,
+        );
+      }
+      return body as JobResource;
     }
-  }
 
-  return handleResponse<JobResource>(response, `Failed to report job outcome for ${jobId}`);
+    if (!response.ok) {
+      const responseText = await response.text();
+      throw new HttpError(
+        `Failed to report job outcome for ${jobId}: ${response.status} ${response.statusText} - ${responseText}`,
+        response.status,
+        parseRetryAfter(response.headers.get("Retry-After")),
+      );
+    }
+
+    return (await response.json()) as JobResource;
+  });
 }
 
 export async function listJobs(
@@ -150,6 +188,50 @@ export async function getConversionFunnel(
 
   const response = await fetch(url, { method: "GET", headers });
   return handleResponse<ConversionFunnelResource>(response, "Failed to get conversion funnel");
+}
+
+export async function amendJobOutcome(
+  jobId: string,
+  amendment: JobOutcomeAmendment,
+  teamId?: string,
+): Promise<JobResource> {
+  if (!amendment.reason || amendment.reason.trim() === "") {
+    throw new Error("amendJobOutcome: reason is required and must be non-blank");
+  }
+
+  const logger = getLogger();
+  const { url, headers } = buildJobRequest(`/${encodeURIComponent(jobId)}/outcome`, teamId);
+
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify(amendment),
+  });
+
+  if (response.status === 422) {
+    logger.warn(`No outcome reported yet for job ${jobId}; cannot amend`);
+    throw new OutcomeNotReportedError(jobId);
+  }
+
+  if (response.status === 409) {
+    logger.warn(`Concurrent outcome update conflict for job ${jobId}`);
+    throw new OutcomeAmendConflictError(jobId);
+  }
+
+  return handleResponse<JobResource>(response, `Failed to amend job outcome for ${jobId}`);
+}
+
+export async function getJobOutcomeHistory(
+  jobId: string,
+  teamId?: string,
+): Promise<JobOutcomeRevisionEntry[]> {
+  const { url, headers } = buildJobRequest(`/${encodeURIComponent(jobId)}/outcome/history`, teamId);
+
+  const response = await fetch(url, { method: "GET", headers });
+  return handleResponse<JobOutcomeRevisionEntry[]>(
+    response,
+    `Failed to get outcome history for ${jobId}`,
+  );
 }
 
 interface SpringPageResponse {

@@ -1,8 +1,8 @@
 import { AsyncLocalStorage } from "async_hooks";
 import { getConfig, getLogger } from "../config/manager.js";
 import { ENV_VARS } from "../constants.js";
-import { reportJobOutcome } from "./job-api-client.js";
-import type { JobOutcome, JobResource } from "../types/jobs.js";
+import { reportJobOutcome, amendJobOutcome } from "./job-api-client.js";
+import type { JobOutcome, JobOutcomeAmendment, JobResource } from "../types/jobs.js";
 
 export interface JobContextData {
   agenticJobId?: string;
@@ -80,6 +80,10 @@ export class JobContext {
 
   async reportOutcome(outcome: JobOutcome): Promise<JobResource> {
     return reportJobOutcome(this.jobId, outcome, this.teamId);
+  }
+
+  async amendOutcome(amendment: JobOutcomeAmendment): Promise<JobResource> {
+    return amendJobOutcome(this.jobId, amendment, this.teamId);
   }
 
   private buildContextData(): JobContextData {

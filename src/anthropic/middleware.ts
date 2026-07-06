@@ -9,62 +9,9 @@ import {
   getMaxPromptSize,
   truncateString,
 } from "../_core/prompt/extraction.js";
-import {
-  CircuitBreaker,
-  DEFAULT_CIRCUIT_CONFIG,
-  FailureStrategy,
-} from "../_core/resilience/circuit-breaker.js";
-import { withRetry } from "../_core/resilience/retry.js";
 import { DEFAULT_CONFIG } from "../_core/constants.js";
 
 const MIDDLEWARE_SOURCE = "revenium-anthropic-node";
-
-const anthropicFailureStrategy: FailureStrategy = {
-  isRetryableError(error: unknown): boolean {
-    if (error instanceof Error) {
-      const msg = error.message.toLowerCase();
-      if (msg.includes("overloaded") || msg.includes("rate_limit")) return true;
-      if (msg.includes("timeout") || msg.includes("abort")) return true;
-      const statusMatch = msg.match(/(\d{3})/);
-      if (statusMatch) {
-        const status = parseInt(statusMatch[1], 10);
-        return status === 429 || status >= 500;
-      }
-    }
-    return true;
-  },
-  isProviderThrottling(error: unknown): boolean {
-    if (error instanceof Error) {
-      const msg = error.message.toLowerCase();
-      return msg.includes("rate_limit") || msg.includes("429");
-    }
-    return false;
-  },
-};
-
-let anthropicCircuitBreaker: CircuitBreaker | null = null;
-
-function getAnthropicCircuitBreaker(): CircuitBreaker {
-  if (!anthropicCircuitBreaker) {
-    anthropicCircuitBreaker = new CircuitBreaker(DEFAULT_CIRCUIT_CONFIG, anthropicFailureStrategy);
-  }
-  return anthropicCircuitBreaker;
-}
-
-export function getCircuitBreakerStats() {
-  return getAnthropicCircuitBreaker().getStats();
-}
-
-export function resetAnthropicCircuitBreaker(): void {
-  if (anthropicCircuitBreaker) {
-    anthropicCircuitBreaker.reset();
-  }
-  anthropicCircuitBreaker = null;
-}
-
-export function canExecuteRequest(): boolean {
-  return getAnthropicCircuitBreaker().canExecute();
-}
 
 export interface AnthropicTrackingData {
   requestId: string;
@@ -327,7 +274,6 @@ export function trackUsageAsync(data: AnthropicTrackingData): void {
       : null;
 
   const failSilent = config.failSilent ?? DEFAULT_CONFIG.FAIL_SILENT;
-  const maxRetries = config.maxRetries ?? DEFAULT_CONFIG.MAX_RETRIES;
 
   void (async () => {
     let payload: ReveniumPayload | undefined;
@@ -359,11 +305,7 @@ export function trackUsageAsync(data: AnthropicTrackingData): void {
             : undefined,
       });
 
-      await getAnthropicCircuitBreaker().execute(async () => {
-        return withRetry(async () => {
-          await sendToRevenium(payload!);
-        }, maxRetries);
-      });
+      await sendToRevenium(payload!);
     } catch (error) {
       logger.warn("Anthropic tracking failed", {
         error: error instanceof Error ? error.message : String(error),
