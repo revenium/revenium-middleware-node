@@ -68,6 +68,8 @@ export interface ReveniumConfig {
   maxPromptSize?: number;
   failSilent?: boolean;
   maxRetries?: number;
+  bufferMaxSize?: number;
+  bufferFlushIntervalMs?: number;
 }
 
 export type WithUsageMetadata<T> = T & {

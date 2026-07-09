@@ -20,6 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Breaking:** `reportJobOutcome` now throws `OutcomeAlreadyReportedError` on 409 when the backend returns a structured conflict body (with `details.guidance`). Consumers relying on the silent-return behavior must add a try/catch. The fallback for legacy backends without the structured body is preserved.
 
+## [1.1.8] - 2026-07-09
+
+### Added
+
+- Store-and-forward buffer for metering events that exhaust retries: events that fail after retry exhaustion or circuit breaker rejection are buffered in memory and replayed automatically every 30s
+- Bounded buffer with configurable capacity (default 1000 events, FIFO eviction) and 24h TTL aligned with backend Idempotency-Key TTL
+- `flushMeteringBuffer()` export for manual flush in serverless shutdown hooks
+- `getBufferStats()` export for observability
+- Automatic best-effort flush on process `beforeExit`, `SIGTERM`, and `SIGINT`
+
 ## [1.1.7] - 2026-07-06
 
 ### Added
@@ -143,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.8]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.8
 [1.1.7]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.7
 [1.1.6]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.6
 [1.1.5]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.5
