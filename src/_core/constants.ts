@@ -57,6 +57,13 @@ export const API_ENDPOINTS = {
   JOBS: "/profitstream/v2/api/jobs",
 } as const;
 
+export const BUFFER_CONFIG = {
+  MAX_SIZE: 1000,
+  FLUSH_INTERVAL_MS: 30_000,
+  MAX_AGE_MS: 86_400_000,
+  FLUSH_TIMEOUT_MS: 10_000,
+} as const;
+
 export const ENFORCEMENT_CONFIG = {
   POLL_INTERVAL: 30000,
 } as const;

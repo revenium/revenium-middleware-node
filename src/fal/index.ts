@@ -134,3 +134,6 @@ export {
   clearToolContext,
   runWithToolContext,
 } from "../_core/tool-metering/index.js";
+
+export { flushMeteringBuffer, getBufferStats } from "../_core/metering/buffer.js";
+export type { BufferStats } from "../_core/metering/buffer.js";

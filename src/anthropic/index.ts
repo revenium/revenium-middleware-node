@@ -36,6 +36,9 @@ export {
 
 export { setConfig, setLogger, getConfig, getLogger } from "../_core/config/manager.js";
 
+export { flushMeteringBuffer, getBufferStats } from "../_core/metering/buffer.js";
+export type { BufferStats } from "../_core/metering/buffer.js";
+
 export interface AnthropicConfig extends Config {
   anthropicApiKey?: string;
   apiTimeout?: number;
