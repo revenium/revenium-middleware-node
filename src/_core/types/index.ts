@@ -34,6 +34,7 @@ export interface UsageMetadata {
   transactionName?: string;
   traceType?: string;
   traceName?: string;
+  ticketId?: string;
   operationSubtype?: string;
   errorReason?: string;
   credentialAlias?: string;
@@ -133,6 +134,7 @@ export interface ReveniumPayload {
   credentialAlias?: string;
   traceType?: string;
   traceName?: string;
+  ticketId?: string;
   agenticJobId?: string;
   agenticJobName?: string;
   agenticJobType?: string;

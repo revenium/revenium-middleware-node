@@ -1,4 +1,5 @@
 import { getLogger } from "../config/manager.js";
+import { ENV_VARS } from "../constants.js";
 
 let cachedRegion: string | null = null;
 let regionCached = false;
@@ -100,6 +101,23 @@ export function getTraceName(): string | null {
   }
 
   return traceName;
+}
+
+export function getTicketId(): string | null {
+  const logger = getLogger();
+  const ticketId = process.env[ENV_VARS.TICKET_ID];
+
+  if (!ticketId) return null;
+
+  if (ticketId.length > 256) {
+    logger.warn("ticket_id exceeds max length of 256 characters. Truncating.", {
+      length: ticketId.length,
+      maxLength: 256,
+    });
+    return ticketId.substring(0, 256);
+  }
+
+  return ticketId;
 }
 
 export function detectOperationSubtype(requestBody?: any): string | null {

@@ -11,6 +11,7 @@ import {
   getParentTransactionId,
   getTransactionName,
   getRetryNumber,
+  getTicketId,
 } from "../_core/metadata/trace-fields.js";
 import { printUsageSummary } from "../_core/prompt/summary-printer.js";
 import type { ReveniumPayload } from "../_core/types/index.js";
@@ -66,6 +67,7 @@ function buildCommonFields(
     transactionName: metadata?.transactionName || getTransactionName() || undefined,
     retryNumber: metadata?.retryNumber ?? getRetryNumber() ?? undefined,
     operationSubtype: metadata?.operationSubtype || undefined,
+    ticketId: metadata?.ticketId || getTicketId() || undefined,
   };
 }
 

@@ -36,6 +36,7 @@ const METADATA_FIELD_MAP: MetadataFieldConfig[] = [
   { source: "transactionName" },
   { source: "traceType" },
   { source: "traceName" },
+  { source: "ticketId" },
   { source: "operationSubtype" },
   { source: "errorReason" },
   { source: "credentialAlias" },

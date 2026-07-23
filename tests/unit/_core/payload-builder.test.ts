@@ -6,6 +6,7 @@ const ENV_KEYS = [
   "REVENIUM_CREDENTIAL_ALIAS",
   "REVENIUM_TRACE_TYPE",
   "REVENIUM_TRACE_NAME",
+  "REVENIUM_TICKET_ID",
   "REVENIUM_PARENT_TRANSACTION_ID",
   "REVENIUM_TRANSACTION_NAME",
   "REVENIUM_RETRY_NUMBER",
@@ -64,6 +65,7 @@ describe("buildPayload precedence", () => {
     process.env.REVENIUM_CREDENTIAL_ALIAS = "env-alias";
     process.env.REVENIUM_TRACE_TYPE = "env-trace-type";
     process.env.REVENIUM_TRACE_NAME = "env-trace-name";
+    process.env.REVENIUM_TICKET_ID = "env-ticket-id";
 
     const params = createParams({
       usageMetadata: {
@@ -74,6 +76,7 @@ describe("buildPayload precedence", () => {
         credentialAlias: "user-alias",
         traceType: "user-trace-type",
         traceName: "user-trace-name",
+        ticketId: "FRONT-123",
       },
     });
 
@@ -86,12 +89,14 @@ describe("buildPayload precedence", () => {
     expect(payload.credentialAlias).toBe("user-alias");
     expect(payload.traceType).toBe("user-trace-type");
     expect(payload.traceName).toBe("user-trace-name");
+    expect(payload.ticketId).toBe("FRONT-123");
   });
 
   it("falls back to env vars when user provides no metadata", async () => {
     process.env.REVENIUM_ENVIRONMENT = "staging";
     process.env.REVENIUM_RETRY_NUMBER = "1";
     process.env.REVENIUM_CREDENTIAL_ALIAS = "env-alias";
+    process.env.REVENIUM_TICKET_ID = "BACK-456";
 
     const params = createParams();
     const payload = await buildPayload(params);
@@ -99,6 +104,16 @@ describe("buildPayload precedence", () => {
     expect(payload.environment).toBe("staging");
     expect(payload.retryNumber).toBe(1);
     expect(payload.credentialAlias).toBe("env-alias");
+    expect(payload.ticketId).toBe("BACK-456");
+  });
+
+  it("truncates ticketId env var exceeding 256 characters", async () => {
+    process.env.REVENIUM_TICKET_ID = "A".repeat(257);
+
+    const params = createParams();
+    const payload = await buildPayload(params);
+
+    expect(payload.ticketId).toHaveLength(256);
   });
 
   it("preserves retryNumber: 0 from user metadata over env var", async () => {

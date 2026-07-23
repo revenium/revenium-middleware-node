@@ -11,6 +11,7 @@ describe("buildMetadataFields", () => {
       transactionName: "synthesis-retry",
       traceType: "workflow",
       traceName: "recommendation-pipeline",
+      ticketId: "FRONT-1543",
       operationSubtype: "function_call",
       errorReason: "schema_validation_failed",
       credentialAlias: "prod-key-1",
@@ -28,6 +29,7 @@ describe("buildMetadataFields", () => {
     expect(result.transactionName).toBe("synthesis-retry");
     expect(result.traceType).toBe("workflow");
     expect(result.traceName).toBe("recommendation-pipeline");
+    expect(result.ticketId).toBe("FRONT-1543");
     expect(result.operationSubtype).toBe("function_call");
     expect(result.errorReason).toBe("schema_validation_failed");
     expect(result.credentialAlias).toBe("prod-key-1");
