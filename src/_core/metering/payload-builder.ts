@@ -7,6 +7,7 @@ import {
   getCredentialAlias,
   getTraceType,
   getTraceName,
+  getTicketId,
   getParentTransactionId,
   getTransactionName,
   getRetryNumber,
@@ -77,6 +78,7 @@ export async function buildPayload(params: PayloadParams): Promise<ReveniumPaylo
       (metadataFields.credentialAlias as string) ?? getCredentialAlias() ?? undefined,
     traceType: (metadataFields.traceType as string) ?? getTraceType() ?? undefined,
     traceName: (metadataFields.traceName as string) ?? getTraceName() ?? undefined,
+    ticketId: (metadataFields.ticketId as string) ?? getTicketId() ?? undefined,
     parentTransactionId:
       (metadataFields.parentTransactionId as string) ?? getParentTransactionId() ?? undefined,
     transactionName:
