@@ -13,6 +13,7 @@ import {
   getTransactionName,
   getRetryNumber,
   detectOperationSubtype,
+  getTicketId,
 } from "../_core/metadata/trace-fields.js";
 import { extractModelSource, extractProvider, extractModelName } from "./provider-mapper.js";
 import type { ReveniumPayload } from "../_core/types/index.js";
@@ -156,6 +157,7 @@ export async function sendReveniumMetrics(data: {
     agenticJobName: data.usageMetadata?.agenticJobName,
     agenticJobType: data.usageMetadata?.agenticJobType,
     agenticJobVersion: data.usageMetadata?.agenticJobVersion,
+    ticketId: data.usageMetadata?.ticketId || getTicketId() || undefined,
     attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
     systemPrompt: promptData?.systemPrompt,
     inputMessages: promptData?.inputMessages,
