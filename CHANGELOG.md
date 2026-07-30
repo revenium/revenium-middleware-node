@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Breaking:** `reportJobOutcome` now throws `OutcomeAlreadyReportedError` on 409 when the backend returns a structured conflict body (with `details.guidance`). Consumers relying on the silent-return behavior must add a try/catch. The fallback for legacy backends without the structured body is preserved.
 
+## [1.1.10] - 2026-07-30
+
+### Fixed
+
+- `ticketId` support for LiteLLM and fal providers
+
 ## [1.1.9] - 2026-07-23
 
 ### Added
@@ -159,6 +165,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Azure OpenAI automatic detection and configuration
 - 130 unit and integration tests
 
+[1.1.10]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.10
 [1.1.9]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.9
 [1.1.8]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.8
 [1.1.7]: https://github.com/revenium/revenium-node-sdk/releases/tag/v1.1.7
