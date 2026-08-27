@@ -5,6 +5,7 @@ const originalFetch = global.fetch;
 
 let sendReveniumMetrics: typeof import("../../../src/litellm/tracking").sendReveniumMetrics;
 let extractUsageFromResponse: typeof import("../../../src/litellm/tracking").extractUsageFromResponse;
+let extractMetadataFromHeaders: typeof import("../../../src/litellm/tracking").extractMetadataFromHeaders;
 let setLiteLLMConfig: typeof import("../../../src/litellm/http-client").setLiteLLMConfig;
 let setConfig: typeof import("../../../src/_core/config/manager").setConfig;
 let resetConfig: typeof import("../../../src/_core/config/manager").resetConfig;
@@ -36,6 +37,7 @@ beforeEach(async () => {
 
   sendReveniumMetrics = tracking.sendReveniumMetrics;
   extractUsageFromResponse = tracking.extractUsageFromResponse;
+  extractMetadataFromHeaders = tracking.extractMetadataFromHeaders;
   setLiteLLMConfig = httpClient.setLiteLLMConfig;
   setConfig = manager.setConfig;
   resetConfig = manager.resetConfig;
@@ -174,5 +176,94 @@ describe("sendReveniumMetrics token field names", () => {
       cachedTokens: 33,
       finishReason: "stop",
     });
+  });
+});
+
+describe("sendReveniumMetrics skill attribution", () => {
+  it("sends the skill fields as camelCase when set in usageMetadata", async () => {
+    const mockFetch = createMockFetch();
+    global.fetch = mockFetch;
+
+    await sendReveniumMetrics({
+      ...baseMetrics,
+      usageMetadata: {
+        skillName: "quarterly-report",
+        skillSource: "projectSettings",
+        skill_kind: "workflow",
+      },
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toHaveProperty("skillName", "quarterly-report");
+    expect(body).toHaveProperty("skillSource", "projectSettings");
+    expect(body).toHaveProperty("skillKind", "workflow");
+    expect(body).not.toHaveProperty("skill_kind");
+  });
+
+  it("omits the skill fields when the caller sets none", async () => {
+    const mockFetch = createMockFetch();
+    global.fetch = mockFetch;
+
+    await sendReveniumMetrics({ ...baseMetrics, usageMetadata: { taskType: "synthesis" } });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).not.toHaveProperty("skillName");
+    expect(body).not.toHaveProperty("skillSource");
+    expect(body).not.toHaveProperty("skillKind");
+    expect(body).not.toHaveProperty("skillPluginName");
+    expect(body).not.toHaveProperty("skillMarketplaceName");
+    expect(body).not.toHaveProperty("skillInvocationTrigger");
+  });
+});
+
+describe("extractMetadataFromHeaders skill headers", () => {
+  it("extracts all six skill headers into camelCase metadata", () => {
+    const metadata = extractMetadataFromHeaders({
+      "x-revenium-skill-name": "quarterly-report",
+      "x-revenium-skill-source": "projectSettings",
+      "x-revenium-skill-kind": "workflow",
+      "x-revenium-skill-plugin-name": "reporting-tools",
+      "x-revenium-skill-marketplace-name": "acme-marketplace",
+      "x-revenium-skill-invocation-trigger": "user-slash",
+    });
+
+    expect(metadata).toMatchObject({
+      skillName: "quarterly-report",
+      skillSource: "projectSettings",
+      skillKind: "workflow",
+      skillPluginName: "reporting-tools",
+      skillMarketplaceName: "acme-marketplace",
+      skillInvocationTrigger: "user-slash",
+    });
+  });
+
+  it("leaves the skill fields unset when the headers are absent", () => {
+    const metadata = extractMetadataFromHeaders({ "x-revenium-task-type": "synthesis" });
+
+    expect(metadata.taskType).toBe("synthesis");
+    expect(metadata.skillName).toBeUndefined();
+    expect(metadata.skillSource).toBeUndefined();
+    expect(metadata.skillKind).toBeUndefined();
+    expect(metadata.skillPluginName).toBeUndefined();
+    expect(metadata.skillMarketplaceName).toBeUndefined();
+    expect(metadata.skillInvocationTrigger).toBeUndefined();
+  });
+
+  it("sends header-supplied skill attribution on the metering body", async () => {
+    const mockFetch = createMockFetch();
+    global.fetch = mockFetch;
+
+    await sendReveniumMetrics({
+      ...baseMetrics,
+      usageMetadata: extractMetadataFromHeaders({
+        "x-revenium-skill-name": "quarterly-report",
+        "x-revenium-skill-invocation-trigger": "user-slash",
+      }),
+    });
+
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toHaveProperty("skillName", "quarterly-report");
+    expect(body).toHaveProperty("skillInvocationTrigger", "user-slash");
+    expect(body).not.toHaveProperty("skillKind");
   });
 });

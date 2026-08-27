@@ -31,6 +31,8 @@ export interface PayloadParams {
     reasoning_tokens?: number;
     cached_tokens?: number;
     cache_creation_tokens?: number;
+    cache_creation_5m_tokens?: number;
+    cache_creation_1h_tokens?: number;
   };
   stopReason: string;
   isStreamed: boolean;
@@ -68,6 +70,8 @@ export async function buildPayload(params: PayloadParams): Promise<ReveniumPaylo
     reasoningTokenCount: params.usage.reasoning_tokens ?? undefined,
     cacheCreationTokenCount: params.usage.cache_creation_tokens ?? undefined,
     cacheReadTokenCount: params.usage.cached_tokens ?? undefined,
+    cacheCreation5mTokenCount: params.usage.cache_creation_5m_tokens ?? undefined,
+    cacheCreation1hTokenCount: params.usage.cache_creation_1h_tokens ?? undefined,
     stopReason: params.stopReason,
     isStreamed: params.isStreamed,
     timeToFirstToken: params.timeToFirstToken,

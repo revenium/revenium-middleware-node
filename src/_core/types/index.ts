@@ -42,6 +42,19 @@ export interface UsageMetadata {
   systemFingerprint?: string;
   temperature?: number;
   idempotencyKey?: string;
+  skillName?: string;
+  skillSource?: string;
+  skillKind?: string;
+  skillPluginName?: string;
+  skillMarketplaceName?: string;
+  skillInvocationTrigger?: string;
+  /** snake_case aliases for the skill fields above. */
+  skill_name?: string;
+  skill_source?: string;
+  skill_kind?: string;
+  skill_plugin_name?: string;
+  skill_marketplace_name?: string;
+  skill_invocation_trigger?: string;
 }
 
 export type OperationType =
@@ -104,6 +117,8 @@ export interface ReveniumPayload {
   reasoningTokenCount: number | undefined;
   cacheCreationTokenCount: number | undefined;
   cacheReadTokenCount: number | undefined;
+  cacheCreation5mTokenCount?: number | undefined;
+  cacheCreation1hTokenCount?: number | undefined;
   stopReason: string;
   isStreamed: boolean;
   timeToFirstToken?: number | undefined;
@@ -135,6 +150,12 @@ export interface ReveniumPayload {
   traceType?: string;
   traceName?: string;
   ticketId?: string;
+  skillName?: string;
+  skillSource?: string;
+  skillKind?: string;
+  skillPluginName?: string;
+  skillMarketplaceName?: string;
+  skillInvocationTrigger?: string;
   agenticJobId?: string;
   agenticJobName?: string;
   agenticJobType?: string;

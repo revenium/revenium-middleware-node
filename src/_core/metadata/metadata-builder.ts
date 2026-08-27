@@ -46,6 +46,29 @@ const METADATA_FIELD_MAP: MetadataFieldConfig[] = [
   { source: "idempotencyKey" },
 ];
 
+const SKILL_FIELD_MAP: Record<string, (keyof UsageMetadata)[]> = {
+  skillName: ["skillName", "skill_name"],
+  skillSource: ["skillSource", "skill_source"],
+  skillKind: ["skillKind", "skill_kind"],
+  skillPluginName: ["skillPluginName", "skill_plugin_name"],
+  skillMarketplaceName: ["skillMarketplaceName", "skill_marketplace_name"],
+  skillInvocationTrigger: ["skillInvocationTrigger", "skill_invocation_trigger"],
+};
+
+const SKILL_FIELD_MAX_LENGTHS: Record<string, number> = {
+  skillName: 256, // mirrors the backend skill name column limit
+  skillSource: 50, // mirrors the backend skill source column limit
+  skillKind: 50, // mirrors the backend skill kind column limit
+  skillPluginName: 256, // mirrors the backend skill plugin name column limit
+  skillMarketplaceName: 256, // mirrors the backend skill marketplace name column limit
+  skillInvocationTrigger: 32, // mirrors the backend skill invocation trigger column limit
+};
+
+function truncateToLimit(value: unknown, maxLength: number): unknown {
+  if (typeof value === "string" && value.length > maxLength) return value.slice(0, maxLength);
+  return value;
+}
+
 function getJobFieldsFromEnv(): Partial<
   Pick<UsageMetadata, "agenticJobId" | "agenticJobName" | "agenticJobType" | "agenticJobVersion">
 > {
@@ -58,6 +81,23 @@ function getJobFieldsFromEnv(): Partial<
   if (envName) result.agenticJobName = envName;
   if (envType) result.agenticJobType = envType;
   if (envVersion) result.agenticJobVersion = envVersion;
+  return result;
+}
+
+export function resolveSkillFields(usageMetadata?: UsageMetadata): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  if (!usageMetadata) return result;
+
+  for (const [targetField, aliases] of Object.entries(SKILL_FIELD_MAP)) {
+    const alias = aliases.find((source) => usageMetadata[source] !== undefined);
+    if (alias) {
+      result[targetField] = truncateToLimit(
+        usageMetadata[alias],
+        SKILL_FIELD_MAX_LENGTHS[targetField],
+      );
+    }
+  }
+
   return result;
 }
 
@@ -92,6 +132,8 @@ export function buildMetadataFields(usageMetadata?: UsageMetadata): Record<strin
   if (merged.productName || merged.productId) {
     result.productName = merged.productName || merged.productId;
   }
+
+  Object.assign(result, resolveSkillFields(merged));
 
   return result;
 }
