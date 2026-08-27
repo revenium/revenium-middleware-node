@@ -100,6 +100,38 @@ describe("extractUsageFromResponse", () => {
     expect(result.cacheCreationTokens).toBeUndefined();
     expect(result.cacheReadTokens).toBeUndefined();
   });
+
+  it("splits cache creation into 5m and 1h buckets from nested cache_creation", () => {
+    const result = extractUsageFromResponse({
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+        cache_creation_input_tokens: 16781,
+        cache_creation: {
+          ephemeral_5m_input_tokens: 10000,
+          ephemeral_1h_input_tokens: 6781,
+        },
+      },
+    });
+
+    expect(result.cacheCreationTokens).toBe(16781);
+    expect(result.cacheCreation5mTokens).toBe(10000);
+    expect(result.cacheCreation1hTokens).toBe(6781);
+  });
+
+  it("leaves the TTL split undefined when nested cache_creation is absent", () => {
+    const result = extractUsageFromResponse({
+      usage: {
+        input_tokens: 100,
+        output_tokens: 50,
+        cache_creation_input_tokens: 25,
+      },
+    });
+
+    expect(result.cacheCreationTokens).toBe(25);
+    expect(result.cacheCreation5mTokens).toBeUndefined();
+    expect(result.cacheCreation1hTokens).toBeUndefined();
+  });
 });
 
 describe("extractUsageFromStream", () => {
@@ -194,6 +226,31 @@ describe("extractUsageFromStream", () => {
     expect(result.outputTokens).toBe(0);
     expect(result.cacheCreationTokens).toBeUndefined();
     expect(result.cacheReadTokens).toBeUndefined();
+  });
+
+  it("extracts the TTL split from nested cache_creation in message_start", () => {
+    const chunks = [
+      {
+        type: "message_start",
+        message: {
+          usage: {
+            input_tokens: 100,
+            cache_creation_input_tokens: 16781,
+            cache_creation: {
+              ephemeral_5m_input_tokens: 16781,
+              ephemeral_1h_input_tokens: 0,
+            },
+          },
+        },
+      },
+      { usage: { output_tokens: 50 } },
+    ];
+
+    const result = extractUsageFromStream(chunks);
+
+    expect(result.cacheCreationTokens).toBe(16781);
+    expect(result.cacheCreation5mTokens).toBe(16781);
+    expect(result.cacheCreation1hTokens).toBe(0);
   });
 });
 
@@ -321,5 +378,60 @@ describe("trackUsageAsync propagation", () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body).toHaveProperty("cacheCreationTokenCount", 0);
     expect(body).toHaveProperty("cacheReadTokenCount", 0);
+  });
+
+  it("forwards the TTL split as cacheCreation5m/1hTokenCount", async () => {
+    const mockFetch = createMockFetch();
+    global.fetch = mockFetch;
+
+    trackUsageAsync({
+      requestId: "req-anthropic-003",
+      model: "claude-3-5-sonnet-20241022",
+      inputTokens: 100,
+      outputTokens: 50,
+      cacheCreationTokens: 16781,
+      cacheReadTokens: 15,
+      cacheCreation5mTokens: 10000,
+      cacheCreation1hTokens: 6781,
+      duration: 1500,
+      isStreamed: false,
+      stopReason: "end_turn",
+      requestTime: new Date(),
+      responseTime: new Date(),
+    });
+
+    await flushPromises();
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).toHaveProperty("cacheCreationTokenCount", 16781);
+    expect(body).toHaveProperty("cacheCreation5mTokenCount", 10000);
+    expect(body).toHaveProperty("cacheCreation1hTokenCount", 6781);
+  });
+
+  it("omits the TTL split fields when not provided", async () => {
+    const mockFetch = createMockFetch();
+    global.fetch = mockFetch;
+
+    trackUsageAsync({
+      requestId: "req-anthropic-004",
+      model: "claude-3-5-sonnet-20241022",
+      inputTokens: 100,
+      outputTokens: 50,
+      cacheCreationTokens: 25,
+      cacheReadTokens: 15,
+      duration: 1500,
+      isStreamed: false,
+      stopReason: "end_turn",
+      requestTime: new Date(),
+      responseTime: new Date(),
+    });
+
+    await flushPromises();
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(body).not.toHaveProperty("cacheCreation5mTokenCount");
+    expect(body).not.toHaveProperty("cacheCreation1hTokenCount");
   });
 });

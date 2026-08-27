@@ -20,6 +20,8 @@ export interface AnthropicTrackingData {
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
   duration: number;
   isStreamed: boolean;
   stopReason?: string;
@@ -142,11 +144,25 @@ function extractAnthropicPrompts(
   };
 }
 
+function extractCacheCreationSplit(usage: any): {
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
+} {
+  const split = usage?.cache_creation;
+  if (!split) return {};
+  return {
+    cacheCreation5mTokens: split.ephemeral_5m_input_tokens,
+    cacheCreation1hTokens: split.ephemeral_1h_input_tokens,
+  };
+}
+
 export function extractUsageFromResponse(response: any): {
   inputTokens: number;
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
   stopReason?: string;
 } {
   const usage = response?.usage || {};
@@ -155,6 +171,7 @@ export function extractUsageFromResponse(response: any): {
     outputTokens: usage.output_tokens || 0,
     cacheCreationTokens: usage.cache_creation_input_tokens,
     cacheReadTokens: usage.cache_read_input_tokens,
+    ...extractCacheCreationSplit(usage),
     stopReason: response?.stop_reason,
   };
 }
@@ -164,12 +181,16 @@ export function extractUsageFromStream(chunks: any[]): {
   outputTokens: number;
   cacheCreationTokens?: number;
   cacheReadTokens?: number;
+  cacheCreation5mTokens?: number;
+  cacheCreation1hTokens?: number;
   stopReason?: string;
 } {
   let inputTokens = 0;
   let outputTokens = 0;
   let cacheCreationTokens: number | undefined;
   let cacheReadTokens: number | undefined;
+  let cacheCreation5mTokens: number | undefined;
+  let cacheCreation1hTokens: number | undefined;
   let stopReason: string | undefined;
 
   for (const chunk of chunks) {
@@ -195,6 +216,11 @@ export function extractUsageFromStream(chunks: any[]): {
     if (usage?.cache_read_input_tokens) {
       cacheReadTokens = usage.cache_read_input_tokens;
     }
+    if (usage?.cache_creation) {
+      const split = extractCacheCreationSplit(usage);
+      cacheCreation5mTokens = split.cacheCreation5mTokens;
+      cacheCreation1hTokens = split.cacheCreation1hTokens;
+    }
     if (chunk?.delta?.stop_reason) {
       stopReason = chunk.delta.stop_reason;
     }
@@ -205,6 +231,8 @@ export function extractUsageFromStream(chunks: any[]): {
     outputTokens,
     cacheCreationTokens,
     cacheReadTokens,
+    cacheCreation5mTokens,
+    cacheCreation1hTokens,
     stopReason,
   };
 }
@@ -294,6 +322,8 @@ export function trackUsageAsync(data: AnthropicTrackingData): void {
           total_tokens: data.inputTokens + data.outputTokens,
           cache_creation_tokens: data.cacheCreationTokens || 0,
           cached_tokens: data.cacheReadTokens || 0,
+          cache_creation_5m_tokens: data.cacheCreation5mTokens,
+          cache_creation_1h_tokens: data.cacheCreation1hTokens,
         },
         stopReason: mapStopReason(data.stopReason, logger),
         isStreamed: data.isStreamed,

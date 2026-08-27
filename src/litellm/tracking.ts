@@ -15,6 +15,7 @@ import {
   detectOperationSubtype,
   getTicketId,
 } from "../_core/metadata/trace-fields.js";
+import { resolveSkillFields } from "../_core/metadata/metadata-builder.js";
 import { extractModelSource, extractProvider, extractModelName } from "./provider-mapper.js";
 import type { ReveniumPayload } from "../_core/types/index.js";
 import type {
@@ -158,6 +159,7 @@ export async function sendReveniumMetrics(data: {
     agenticJobType: data.usageMetadata?.agenticJobType,
     agenticJobVersion: data.usageMetadata?.agenticJobVersion,
     ticketId: data.usageMetadata?.ticketId || getTicketId() || undefined,
+    ...resolveSkillFields(data.usageMetadata),
     attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
     systemPrompt: promptData?.systemPrompt,
     inputMessages: promptData?.inputMessages,
@@ -236,6 +238,12 @@ export function extractMetadataFromHeaders(headers: Record<string, string>): Lit
     credentialAlias: headers["x-revenium-credential-alias"],
     traceType: headers["x-revenium-trace-type"],
     traceName: headers["x-revenium-trace-name"],
+    skillName: headers["x-revenium-skill-name"],
+    skillSource: headers["x-revenium-skill-source"],
+    skillKind: headers["x-revenium-skill-kind"],
+    skillPluginName: headers["x-revenium-skill-plugin-name"],
+    skillMarketplaceName: headers["x-revenium-skill-marketplace-name"],
+    skillInvocationTrigger: headers["x-revenium-skill-invocation-trigger"],
     capturePrompts: headers["x-revenium-capture-prompts"]
       ? headers["x-revenium-capture-prompts"].toLowerCase() === "true"
       : undefined,

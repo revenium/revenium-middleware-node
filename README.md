@@ -362,18 +362,24 @@ const result = await meterTool(
 
 All fields are optional and can be set per-request via `usageMetadata`:
 
-| Field                   | Type   | Description                                            |
-| ----------------------- | ------ | ------------------------------------------------------ |
-| `traceId`               | string | Unique identifier for session or conversation tracking |
-| `taskType`              | string | Type of AI task (e.g., "chat", "embedding")            |
-| `agent`                 | string | AI agent or bot identifier                             |
-| `organizationName`      | string | Organization or company name                           |
-| `productName`           | string | Product or feature name                                |
-| `subscriptionId`        | string | Subscription plan identifier                           |
-| `responseQualityScore`  | number | Custom quality rating (0.0-1.0)                        |
-| `subscriber.id`         | string | Unique user identifier                                 |
-| `subscriber.email`      | string | User email address                                     |
-| `subscriber.credential` | object | Authentication credential (`name` and `value`)         |
+| Field                    | Type   | Description                                            |
+| ------------------------ | ------ | ------------------------------------------------------ |
+| `traceId`                | string | Unique identifier for session or conversation tracking |
+| `taskType`               | string | Type of AI task (e.g., "chat", "embedding")            |
+| `agent`                  | string | AI agent or bot identifier                             |
+| `organizationName`       | string | Organization or company name                           |
+| `productName`            | string | Product or feature name                                |
+| `subscriptionId`         | string | Subscription plan identifier                           |
+| `responseQualityScore`   | number | Custom quality rating (0.0-1.0)                        |
+| `subscriber.id`          | string | Unique user identifier                                 |
+| `subscriber.email`       | string | User email address                                     |
+| `subscriber.credential`  | object | Authentication credential (`name` and `value`)         |
+| `skillName`              | string | Name of the skill that produced the request            |
+| `skillSource`            | string | Where the skill came from (e.g., "projectSettings")    |
+| `skillKind`              | string | Kind of skill (e.g., "workflow")                       |
+| `skillPluginName`        | string | Plugin that provides the skill                         |
+| `skillMarketplaceName`   | string | Marketplace the skill plugin came from                 |
+| `skillInvocationTrigger` | string | How the skill was invoked (e.g., "user-slash")         |
 
 ## Trace Visualization Fields
 
